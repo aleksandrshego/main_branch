@@ -1,0 +1,357 @@
+#include <iostream>
+#include <vector>
+#include <fstream>
+#include <sstream>
+#include <algorithm>
+#include <map>
+#include <Windows.h>
+#include <conio.h>
+
+using namespace std;
+
+struct BusRoutes
+{
+	BusRoutes() : route_number(0), driver_name("null"), bus_number(0), brand_bus("null")
+	{}
+
+	BusRoutes(unsigned int route_number, string driver_name, unsigned int bus_number, string brand_bus)
+	{
+		this->route_number = route_number;
+		this->driver_name = driver_name;
+		this->bus_number = bus_number;
+		this->brand_bus = brand_bus;
+	}
+
+	unsigned int route_number;
+	string driver_name;
+	unsigned int bus_number;
+	string brand_bus;
+
+	friend ostream& operator<<(ostream& out, const BusRoutes& a)
+	{
+		out << a.route_number << " " << a.driver_name << " " << a.bus_number << " " << a.brand_bus << "\n";
+		return out;
+	}
+};
+
+void prov_reading(ifstream& file)
+{
+	if (!file.is_open())
+		throw exception("Ошибка открытия файла.");
+	if (file.peek() == EOF)
+		throw exception("Файл пуст.");
+}
+
+void print(const vector<BusRoutes>& br)
+{
+	for (int i = 0; i < br.size(); ++i)
+	{
+		cout << br[i];
+	}
+	cout << "\n";
+}
+
+void print(const map<string, BusRoutes>& rt)
+{
+	for (const auto& k : rt)
+		cout << k.second.route_number << " " << k.first << " " << k.second.bus_number << " " << k.second.brand_bus << "\n";
+	cout << "\n";
+}
+
+BusRoutes filling_object(const string& s)
+{
+	istringstream ist(s);
+	BusRoutes br;
+	string input;
+	for (int i = 0; i < 4; ++i)
+	{
+		if (!(ist >> input))
+			throw exception("Не хватает элементов.");
+		if (i == 0)
+		{
+			/*if (input.size() != 3)
+				throw exception("Invalid route number.");*/
+			br.route_number = stoi(input);
+		}
+		else if (i == 1)
+			br.driver_name = input;
+		else if (i == 2)
+		{
+			/*if (input.size() != 2)
+				throw exception("Invalid bus number.");*/
+			br.bus_number = stoi(input);
+		}
+		else if (i == 3)
+			br.brand_bus = input;
+	}
+	return br;
+}
+
+void read_file(vector<BusRoutes>& bus)
+{
+	try
+	{
+		ifstream fin("BusRoutes.txt");
+		prov_reading(fin);
+
+		string str;
+		while (getline(fin, str))
+		{
+			bus.push_back(filling_object(str));
+		}
+
+		print(bus);
+
+		fin.close();
+	}
+	catch (exception& ex)
+	{
+		cout << ex.what() << "\n";
+	}
+}
+
+bool comp(const BusRoutes& a, const BusRoutes& b)	
+{
+	if (a.bus_number == b.bus_number)
+		return a.route_number < a.route_number;
+	return a.bus_number < b.bus_number;
+}
+
+void filling_map(map<string, BusRoutes>& rt, const vector<BusRoutes>& bus)
+{
+	for (int i = 0; i < bus.size(); ++i)
+	{
+		rt[bus[i].driver_name] = bus[i];
+	}
+}
+
+void find_route(const unsigned int& rt, const map<string, BusRoutes>& rts)
+{
+	bool prov = false;
+	for (const auto& k : rts)
+	{
+		if (rt == k.second.route_number)
+		{
+			if (!prov)
+				cout << "Номера автобусов идущих по данному маршруту:\n";
+			cout << k.second.bus_number << "\n";
+			prov = true;
+		}
+	}
+	if (!prov)
+	{
+		cout << "Автобусов по указанному маршруту нет.\n";
+	}
+}
+
+void find_brand(const string& bd, const map<string, BusRoutes>& br)
+{
+	bool prov = false;
+	for (const auto& k : br)
+	{
+		if (bd == k.second.brand_bus)
+		{
+			if (!prov)
+				cout << "Водители, работающие на данной марке автобуса:\n";
+			cout << k.second.driver_name << "\n";
+			prov = true;
+		}
+	}
+	if (!prov)
+	{
+		cout << "Водителей, работающих на автобусе данной марки, нет.\n";
+	}
+}
+
+bool clarification()
+{
+	cout << "Удалять все элементы связанные с введённым значением? (д/н)\n";
+	switch (_getch())
+	{
+	case 228:
+	{
+		return true;
+		break;
+	}
+	case 237:
+	{
+		return false;
+		break;
+	}
+	default:
+	{
+		cout << "Ошибка, повторите ещё раз.\n";
+		system("pause");
+		system("cls");
+		clarification();
+	}
+	}
+}
+
+void erase_with_driver_name(map<string, BusRoutes>& rt, const bool& clar, const string& d_n)
+{
+	for (auto it = rt.begin(); it != rt.end();)
+	{
+		if (it->first == d_n)
+		{
+			rt.erase(it);
+			if (clar)
+			{
+				erase_with_driver_name(rt, clar, d_n);
+			}
+			break;
+		}
+		else
+		{
+			++it;
+		}
+	}
+}
+
+void erase_with_route_number(map<string, BusRoutes>& rt, const bool& clar, const int& r_n)
+{
+	for (auto it = rt.begin(); it != rt.end();)
+	{
+		if (it->second.route_number == r_n)
+		{
+			rt.erase(it);
+			if (clar)
+			{
+				erase_with_route_number(rt, clar, r_n);
+			}
+			break;
+		}
+		else
+		{
+			++it;
+		}
+	}
+}
+
+void erase_with_bus_number(map<string, BusRoutes>& rt, const bool& clar, const int& b_n)
+{
+	for (auto it = rt.begin(); it != rt.end();)
+	{
+		if (it->second.bus_number == b_n)
+		{
+			rt.erase(it);
+			if (clar)
+			{
+				erase_with_bus_number(rt, clar, b_n);
+			}
+			break;
+		}
+		else
+		{
+			++it;
+		}
+	}
+}
+
+void erase_with_brand_bus(map<string, BusRoutes>& rt, const bool& clar, const string& b_b)
+{
+	for (auto it = rt.begin(); it != rt.end();)
+	{
+		if (it->second.brand_bus == b_b)
+		{
+			rt.erase(it);
+			if (clar)
+			{
+				erase_with_brand_bus(rt, clar, b_b);
+			}
+			break;
+		}
+		else
+		{
+			++it;
+		}
+	}
+}
+
+void menu_erase(map<string, BusRoutes>& rt)
+{
+	cout << "Выберите один из вариантов удаления информации:\nс помощью:\n\t1) имени водителя;\n\t2) номера маршрута;\n\t3) номера автобуса;\n\t4) марки автобуса;\n";
+	switch (_getch())
+	{
+	case '1':
+	{
+		system("cls");
+		string driver_name;
+		cout << "Введите имя водителя: "; cin >> driver_name;
+		erase_with_driver_name(rt, clarification(), driver_name);
+		print(rt);
+		break;
+	}
+	case '2':
+	{
+		system("cls");
+		int route_number;
+		cout << "Введите номер маршрута: "; cin >> route_number;
+		erase_with_route_number(rt, clarification(), route_number);
+		print(rt);
+		break;
+	}
+	case '3':
+	{
+		system("cls");
+		int bus_number;
+		cout << "Введите номер автобуса: "; cin >> bus_number;
+		erase_with_bus_number(rt, clarification(), bus_number);
+		print(rt);
+		break;
+	}
+	case '4':
+	{
+		system("cls");
+		string brand_bus;
+		cout << "Введите марку автобуса: "; cin >> brand_bus;
+		erase_with_brand_bus(rt, clarification(), brand_bus);
+		print(rt);
+		break;
+	}
+	default:
+	{
+		cout << "Ошибка, повторите ещё раз.\n";
+		system("pause");
+		system("cls");
+
+		menu_erase(rt);
+	}
+	}
+}
+
+int main()
+{
+	SetConsoleCP(1251);
+	SetConsoleOutputCP(1251);
+
+	vector<BusRoutes> bus_routes;
+	read_file(bus_routes);
+
+	sort(bus_routes.begin(), bus_routes.end(), comp);
+
+	cout << "После сортировки:\n";
+	print(bus_routes);
+	system("pause");
+	system("cls");
+
+	map<string, BusRoutes> routes;
+	filling_map(routes, bus_routes);
+
+	unsigned int route;
+	cout << "Введите номер маршрута: "; cin >> route;
+
+	find_route(route, routes);
+	cout << "\n";
+
+	string brand;
+	cout << "Введите марку автобуса: "; cin >> brand;
+	find_brand(brand, routes);
+	system("pause");
+	system("cls");
+
+	menu_erase(routes);
+
+	system("pause");
+	return 0;
+}

@@ -1,0 +1,19 @@
+#pragma once
+#include <iostream>
+
+using namespace std;
+
+class List
+{
+protected:
+	virtual void* GetElement(int index) = 0;
+	virtual void SetElement(void* data, int index) = 0;
+	virtual void AddEnd(void* data) = 0;
+	virtual void AddBegin(void* data) = 0;
+	virtual void Insert(void* data, int index) = 0;
+	virtual void Delete(int index) = 0;
+	virtual void Clear() = 0;
+	virtual void Reverse() = 0;
+	virtual void Print() = 0;
+	virtual int GetCount() = 0;
+};

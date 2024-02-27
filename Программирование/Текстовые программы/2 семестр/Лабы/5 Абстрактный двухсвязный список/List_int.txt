@@ -1,0 +1,259 @@
+#include "List_int.h"
+
+List_int::List_int()
+{
+    begin = end = nullptr;
+    count = 0;
+}
+
+//List_int::List_int(const List_int& obj) // можно и даже нужно сделать через функцию copy(), потому что алгоритм аналогичный
+//{
+//    Clear();
+//    Element_int* t = obj.begin;
+//    while (t != nullptr)
+//    {
+//        AddEnd(&t->data);
+//        t = t->next;
+//    }
+//}
+
+List_int::List_int(const List_int& obj)
+{
+    Copy(obj);
+}
+
+List_int& List_int::operator=(const List_int& obj)
+{
+    if (this != &obj) // проверка на самоприсваивание)
+    {
+        Copy(obj);
+    }
+    return *this;
+}
+
+int List_int::GetCount()
+{
+    return count;
+}
+
+void List_int::AddBegin(void* data)
+{
+    try
+    {
+        Element_int* t = new Element_int;
+        t->data = *((int*)data);
+        t->prev = nullptr;
+        t->next = begin;
+
+        if (count == 0)
+            begin = end = t;
+        else
+        {
+            begin->prev = t;
+            begin = t;    
+        }
+        count++;
+    }
+    catch (bad_alloc& ba) // если не выделится память
+    {
+        cout << ba.what() << "\n";
+    }
+}
+
+void List_int::AddEnd(void* data)
+{
+    try
+    {
+        Element_int* t = new Element_int;
+        t->data = *((int*)data);
+        t->next = nullptr;
+        t->prev = end;
+        
+        if (count == 0)
+        {
+            end = begin = t;
+        }
+        else
+        {
+            end->next = t;
+            end = t;
+        }
+        count++;
+    }
+    catch (bad_alloc& ba)
+    {
+        cout << ba.what() << "\n";
+    }
+}
+
+void List_int::Print()
+{
+    if (count == 0)
+        cout << "List is empty.\n";
+    else
+    {
+        Element_int* t = begin;
+        for (int i = 0; i < count; i++)
+        {
+            cout << t->data << " ";
+            t = t->next;
+        }
+        cout << "\n";
+    }
+}   
+
+void List_int::SetElement(void* data, int index)
+{
+    try
+    {
+        CorrectIndex(index);
+        
+        Element_int* t = Move(index);
+        t->data = *((int*)data);
+    }
+    catch (exception &ex)
+    {
+        cout << ex.what() << "\n";
+    }
+}
+
+void* List_int::GetElement(int index)
+{
+    try
+    {
+        CorrectIndex(index);
+
+        Element_int* t = Move(index);
+
+        void* k = &(t->data);
+
+        return k;
+    }
+    catch (exception& ex)
+    {
+        cout << ex.what() << "\n";
+    }
+}
+
+void List_int::Insert(void* data, int index)
+{
+    try
+    {
+    if (index > count)
+        throw exception("The index is larger than the dimension.");
+    if (count == index)
+    {
+        AddEnd(data);
+        return;
+    }
+    if (index == 0)
+    {
+        AddBegin(data);
+        return;
+    }
+   
+        Element_int* t = new Element_int;
+        t->data = *((int*)data);
+
+        Element_int* prev = Move(index - 1);
+        Element_int* next = prev->next;
+
+        t->prev = prev;
+        prev->next = t;
+        t->next = next;
+        next->prev = t;
+
+        count++;
+    }
+    catch (bad_alloc& ex)
+    {
+        cout << ex.what() << "\n";
+    }
+    catch (exception& ex)
+    {
+        cout << ex.what() << "\n";
+    }
+}
+
+void List_int::Delete(int index)
+{
+    try
+    {
+        CorrectIndex(index);
+        if (count == 0)
+            return;
+        
+        Element_int* t = Move(index);
+        Element_int* prev = t->prev;
+        Element_int* next = t->next;
+
+        if ((count > 1) && (prev != nullptr))
+            prev->next = next;
+        if ((count > 1) && (next != nullptr))
+            next->prev = prev;
+        if (index == 0)
+            begin = next;
+        if (index = count - 1)
+            end = prev;
+
+        delete t;
+        count--;
+    }
+    catch (exception &ex)
+    {
+        cout << ex.what() << "\n";
+    }
+}
+
+void List_int::Reverse()
+{
+    List_int L;
+    Element_int* t = begin;
+    while (t != nullptr)
+    {
+        L.AddBegin(&(t->data));
+        t = t->next;
+    }
+
+    *this = L; // ошибка была в том, что я не перегрузил оператор, поэтому у меня поменялся адрес и удалилось два элемента, вместо одного - L.
+}
+
+void List_int::Clear()
+{
+    int n = count; // сделали копию, так как count меняется при удалении, следовательно, появится ошибка
+    for (int i = 0; i < n; i++)
+        Delete(0);
+}
+
+void List_int::CorrectIndex(int index)
+{
+    if (index >= count)
+        throw exception("The index is larger than the dimension.");
+}
+
+void List_int::Copy(const List_int& obj)
+{
+    Clear(); // очищаем список, чтобы копировать содержимое другого списка
+
+    Element_int* t = obj.begin;
+        
+    while (t != nullptr)
+    {
+        AddEnd(&(t->data));
+        t = t->next;
+    }
+}
+
+Element_int* List_int::Move(int index)
+{
+    Element_int* t = begin;
+
+    for (int i = 0; i < index; i++)
+        t = t->next;
+    return t;
+}
+
+List_int::~List_int()
+{
+    Clear();
+}

@@ -1,0 +1,265 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include "TDeque.h"
+#include <conio.h>
+#include <Windows.h>
+#include <typeinfo>
+#include <cstring>
+
+#define cls system("cls")
+#define pause system("pause")
+
+template<typename T> // создал, чтобы просто занять место для функции 
+void view(T data) {}
+
+template<typename Type>
+void case_first(TDeque<Type>& deq)
+{
+	Type data;
+	cout << "Введите элемент: "; cin >> data;
+	deq.InsFront(data);
+	cls;
+}
+
+template<>
+void case_first(TDeque<char*>& deq)
+{
+	char* str = new char[5];
+	cout << "Введите элемент: "; cin.getline(str, 256);
+	deq.InsFront((char*)str);
+	cls;
+}
+
+template<typename Type>
+void case_second(TDeque<Type>& deq)
+{
+	Type data;
+	cout << "Введите элемент: "; cin >> data;
+	deq.InsRear(data);
+	cls;
+}
+
+template<>
+void case_second(TDeque<char*>& deq)
+{
+	char* str = new char[5];
+	cout << "Введите элемент: "; cin.getline(str, 256);
+	deq.InsRear((char*)str);
+	cls;
+}
+
+template<typename Type>
+void case_five(TDeque<Type>& deq) // изменение элемента по индексу
+{
+	Type data; register int index;
+	cout << "Введите индекс элемента: "; cin >> index;
+	cout << "Введите значение: "; cin >> data;
+	deq.SetByIndex(data, index); // здесь сразу вставлена проверка
+}
+
+template<>
+void case_five(TDeque<char*>& deq)
+{
+	char* str = new char[5]; register int index;
+	cout << "Введите индекс элемента: "; cin >> index;
+	cout << "Введите значение: "; cin.ignore();
+	cin.getline(str, 256);
+	deq.SetByIndex((char*)str, index);
+}
+
+template<typename Type>
+void work_with_deque(TDeque<Type>& deque)
+{
+	cout << "Что вы желаете сделать?\n\t1) Добавить элемент в начало очереди;\n\t2) Добавить элемент в конец очереди;\n\t3) Исключить элемент из начала очереди;\n\t4) Исключить элемент из конца очереди;\n\t5) Изменить элемент по индексу;\n\t6) Просмотр элементов;\n\tНажмите q, если желаете завершить.\n\t";
+	switch (_getch())
+	{
+	case '1':
+	{
+		cls;
+		case_first(deque);
+		work_with_deque(deque);
+		break;
+	}
+	case '2':
+	{
+		cls;
+		case_second(deque);
+		work_with_deque(deque);
+		break;
+	}
+	case '3':
+	{
+		cls;
+		deque.DelFront();
+		//cout << "Начальный элемент удалён.\n";
+		pause; cls;
+		work_with_deque(deque);
+		break;
+	}
+	case '4':
+	{
+		cls;
+		deque.DelRear();
+		//cout << "Конечный элемент удалён.\n";
+		pause; cls;
+		work_with_deque(deque);
+		break;
+	}
+	case '5':
+	{
+		cls;
+		case_five(deque);
+		cls;
+		work_with_deque(deque);
+		break;
+	}
+	case '6':
+	{
+		cls;
+		deque.Browse(view);
+		pause; cls;
+		work_with_deque(deque);
+		break;
+	}
+	case 113:
+	{
+		cls;
+		cout << "End\n";
+		break;
+	}
+	case 233:
+	{
+		cls;
+		cout << "End\n";
+		break;
+	}
+	default:
+	{
+		cout << "Ошибка, повторите ещё раз.\n";
+		pause; cls;
+		work_with_deque(deque);
+	}
+	}
+}
+
+void menu()
+{	
+	try
+	{
+		switch (_getch())
+		{
+		case '1':
+		{
+			cls;
+			TDeque<int> deq;
+			work_with_deque(deq);
+			break;
+		}
+		case '2':
+		{
+			cls;
+			TDeque<double> deque;
+			work_with_deque(deque);
+			break;
+		}
+		case '3':
+		{
+			cls;
+			TDeque<char*> deque;
+			work_with_deque(deque);
+			break;
+		}
+		default:
+		{
+			cout << "Ошибка, повторите ещё раз.\n";
+			menu();
+		}
+		}
+	}
+	catch (bad_alloc& ba)
+	{
+		cout << ba.what() << "\n";
+	}
+}
+
+int main()
+{
+	SetConsoleCP(1251);
+	SetConsoleOutputCP(1251);
+
+	cout << "Выберите один из типов очереди:\n\t1) int;\n\t2) double;\n\t3) char*\n";
+	menu();
+
+	return 0;
+}
+
+//#define see .Browse(view) // просмотр
+//#define chr (char*) // преобразование в char*
+//
+//
+//template<typename T>
+//void increasing(T data) 
+//{
+//	data += 5;
+//}
+//
+//template<typename T>
+//void increas(T &data)
+//{
+//	data += 5;
+//}
+//
+//
+//
+//int main()
+//{
+//	
+//
+//
+//
+//	TDeque<char*> p;
+//	TDeque<int> k;
+//	
+//	char ley[256] = "hey";
+//
+//	p.InsRear(chr"hello");
+//	p.InsRear(chr"mama");
+//	p.InsFront(ley);
+//
+//	p see;
+//
+//	p.SetByIndex(chr"здрасьте", 1);
+//
+//	p see;
+//
+//	k.InsRear(5);
+//	k.InsRear(1);
+//	k.InsRear(-2);
+//	k.InsRear(123);
+//	k.InsRear(6);
+//	k.InsRear(8);
+//	k.Browse(view);
+//
+//	TDeque<int> l(k);
+//	l.Browse(view);
+//	l.DelFront();
+//	l.DelRear();
+//	cout << l.GetByIndex(0) << "\n";
+//	l.InsFront(10);
+//	l.Browse(view);
+//	l.SetByIndex(-12412, 0);
+//	l.Browse(increasing);
+//	l.Browse(increas); 
+//
+//	TDeque<int> const a(l);
+//	a.Browse(increasing);
+//	/*	
+//		a.Browse(increas);
+//		будет ошибка, так как мы ссылаемся на объект 
+//		и пытаемся его изменить, 
+//		но ведь мы создали константный объект, 
+//		поэтому изменять мы его не имеем права
+//	*/
+//	k = l;
+//	k.Browse(view);
+//	return 0;
+//}

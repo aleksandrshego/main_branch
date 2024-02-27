@@ -1,0 +1,23 @@
+#include <iostream>
+using namespace std;
+int main()
+{
+	setlocale(LC_ALL, "rus");
+	int number, max, k = 0;
+	cout << "Введите натуральное число\n";
+	cin >> number;
+	if (number <= 0)
+	{
+		cout << "Число не натуральное\n";
+		return 0;
+	}
+	max = number % 10;
+	while (number != 0)
+	{
+		number /= 10;
+		if (max < number % 10)
+			max = number % 10;
+	}
+	cout << "Самая большая цифра числа = " << max << endl;
+	return 0;
+}

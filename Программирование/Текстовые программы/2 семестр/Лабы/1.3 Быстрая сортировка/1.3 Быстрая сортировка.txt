@@ -1,0 +1,224 @@
+#include <iostream>
+#include <fstream>
+#include <conio.h>
+#include <Windows.h>
+#include "qsortCustom.h"
+
+using namespace std;
+
+int GetSizeArray()
+{
+	int s;
+	cout << "Введите размерность массива - ";
+	cin >> s;
+
+	while (s < 1)
+	{
+		cout << "Вы ввели малую размерность.\nВведите ещё раз - ";
+		cin >> s;
+	}
+
+	return s;
+}
+
+void InputArr(int* a, const int& s)
+{
+	cout << "Введите элементы массива.\n";
+	for (int i = 0; i < s; i++)
+		cin >> a[i];
+}
+
+void OutputArr(int* a, const int& s, ofstream& out)
+{
+	for (int i = 0; i < s; i++)
+	{
+		out << a[i];
+		if (i != s - 1)
+			out << " ";
+	}
+}
+
+bool ProvOFstream(ofstream& out)
+{
+	if (!out.is_open())
+	{
+		cout << "Ошибка открытия файла OUT.txt\n";
+		return false;
+	}
+	return true;
+}
+
+bool ProvIFstream(ifstream& in)
+{
+	if (!in.is_open())
+	{
+		cout << "Ошибка открытия файла IN.txt\n";
+		return false;
+	}
+	else if (in.peek() == EOF)
+	{
+		cout << "Ошибка. Файл пуст.\n";
+		return false;
+	}
+	return true;
+}
+
+void InputArrWithRandom(int* a, const int& size)
+{
+	int x, y;
+	cout << "Введите диапазон генерирования чисел:\nот ";
+	cin >> x;
+	cout << "до ";
+	cin >> y;
+	if (y < x)
+		swap(x, y);
+
+	srand(time(NULL));
+	for (int i = 0; i < size; i++)
+		a[i] = rand() % (y - x) + 1 + x;
+
+}
+
+int GetArraySizeOfFile(ifstream& in)
+{
+	int size = 0, value;
+	while (in >> value)
+		size++;
+	return size;
+}
+
+void GetArrayOfFile(int* a, const int& s, ifstream& in)
+{
+	for (int i = 0; i < s; i++)
+	{
+		in >> a[i];
+	}
+}
+
+void number_1()
+{
+	ofstream fout;
+	fout.open("OUT.txt");
+	
+	if (ProvOFstream(fout))
+	{
+		int size = GetSizeArray();
+		int* arr = new int[size];
+		InputArr(arr, size);
+		OutputArr(arr, size, fout);
+		fout << " - исходный порядок чисел.\n";
+
+		sort(arr, 0, size - 1); // сама сортировка
+
+		OutputArr(arr, size, fout);
+		fout << " - отсортированный порядок чисел.\n";
+		delete[] arr;
+
+		cout << "\nСортировка выполенена успешно\n";
+	}
+
+	fout.close();
+}
+
+void number_2()
+{
+	ofstream fout;
+	fout.open("OUT.txt");
+
+	if (ProvOFstream(fout))
+	{
+		int size = GetSizeArray();
+		int* arr = new int[size];
+		InputArrWithRandom(arr, size);
+		OutputArr(arr, size, fout);
+		fout << " - исходный порядок чисел.\n";
+
+		sort(arr, 0, size - 1);
+
+		OutputArr(arr, size, fout);
+		fout << " - отсортированный порядок чисел.\n";
+		delete[] arr;
+
+		cout << "\nСортировка выполенена успешно\n";
+	}
+
+	fout.close();
+}
+
+void number_3()
+{
+	ifstream fin;
+	ofstream fout;
+	fin.open("IN.txt");
+	fout.open("OUT.txt");
+
+	if (ProvOFstream(fout) && ProvIFstream(fin))
+	{
+		int size = GetArraySizeOfFile(fin);
+		fin.clear(); fin.seekg(0);
+
+		int* arr = new int[size];
+
+		GetArrayOfFile(arr, size, fin);
+
+		OutputArr(arr, size, fout);
+		fout << " - исходный порядок чисел.\n";
+
+		sort(arr, 0, size - 1);
+
+		OutputArr(arr, size, fout);
+		fout << " - отсортированный порядок чисел.\n";
+		delete[] arr;
+
+		cout << "\nСортировка выполнена успешно.\n";
+	}
+
+	fin.close();
+	fout.close();
+}
+
+void choice()
+{
+	cout << "Выберите один из вариантов ввода:\n1. Непосредственный ввод и запись в тестовый файл;\n2. Генерирование с помощью датчика случайных чисел и запись в текстовый файл;\n3. Ввод из текстового файла.\n";
+	bool prov = false;
+	while (!prov)
+	{
+		switch (_getch())
+		{
+		case '1':
+		{
+			system("cls");
+			number_1();
+			prov = true;
+			break;
+		}
+		case '2':
+		{
+			system("cls");
+			number_2();
+			prov = true;
+			break;
+		}
+		case '3':
+		{
+			system("cls");
+			number_3();
+			prov = true;
+			break;
+		}
+		default:
+		{
+			cout << "\nОшибка. Вы нажали неверную клавишу, попробуйте ещё раз.\n";
+		}
+		}
+	}
+}
+
+int main()
+{
+	setlocale(LC_ALL, "rus");
+
+	choice();
+
+	return 0;
+}

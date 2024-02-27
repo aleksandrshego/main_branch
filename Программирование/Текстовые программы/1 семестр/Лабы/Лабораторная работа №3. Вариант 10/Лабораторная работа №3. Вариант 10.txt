@@ -1,0 +1,217 @@
+#include <iostream>
+#include <cmath>
+#include <ctime>
+#include <windows.h>
+#include <conio.h>
+using namespace std;
+int main()
+{
+	const int SIZE{ 50 };
+	double long a[SIZE], n{ 0.0 }, sum{ 0.0 }, max_arr{ 0.0 }, min_arr{ 0.0 }, temp{ 0.0 };
+	int x{ 0 }, y{ 0 }, imin{ 0 }, imax{ 0 }, number{ 0 }, min{ 0 }, max{ 0 };
+	srand(time(NULL));
+	cout << "Enter the size of the array:\n";
+	cin >> n;
+	while (n < 1 || n > SIZE)
+	{
+		cout << "\nError\n";
+		Sleep(500);
+		cout << "\nPlease, try again \nEnter the size of the array:\n";
+		cin >> n;
+	}
+	cout << "\nWould you like to fill the array manually (press 1) or randomly (press 2):\n";
+	switch (_getch())
+	{
+	case '1':
+	{
+		cout << "You have chosen number - 1.\n";
+		Sleep(300);
+		cout << "\nEnter array elements:\n";
+		for (int i = 0; i < n; i++)
+			cin >> a[i]; break;
+	}
+	case '2':
+	{
+		cout << "You have chosen number - 2.\n";
+		Sleep(300);
+		cout << "\nEnter the boundaries of the interval to which random numbers should belong:\n";
+		cin >> x >> y;
+		Sleep(500);
+		system("cls");
+		if (x > y)
+			swap(x, y);
+
+		Sleep(500);
+		cout << "Randomly obtained array:\n";
+
+		for (int i = 0; i < n; i++)
+		{
+			a[i] = (float)(rand() % 20000001) / 100 - 100;
+			//a[i] = (float)x + rand() % y;
+			while (a[i] < x || a[i] > y)
+				a[i] = (float)(rand() % 20000001) / 100 - 100;
+				//a[i] = (float)x + rand() % y;
+			Sleep(50);
+			++number;
+			cout << number << ". array [" << i << "] - ";
+			cout << a[i] << "\n";
+		}
+		number = 0;
+		break;
+	}
+	default:
+	{
+		cout << "\nError\n";
+		Sleep(500);
+		return 0;
+	}
+	}
+	// Находим номер максимального и минимального элемента массива
+	min_arr = a[0];
+	max_arr = a[0];
+	for (int i = 1; i < n; i++)
+	{
+		if (fabs(a[i]) <= fabs(min_arr))
+		{
+			min_arr = a[i];
+			imin = i + 1;
+		}
+		if (fabs(a[i]) >= fabs(max_arr))
+		{
+			max_arr = a[i];
+			imax = i + 1;
+		}
+	}
+	Sleep(500);
+	cout << "\nMinimum module element number = " << imin << "\n";
+	Sleep(500);
+	cout << "\nMaximum module element number = " << imax << "\n";
+	min_arr = 0;
+	max_arr = 0;
+
+	Sleep(500);
+	for (int i = imin; i < n; i++)
+	{
+		sum += a[i];
+	}
+	if (imin == n)
+	{
+		cout << "\nThe amount doesn't exist.\n";
+	}
+	else
+		cout << "\nThe summa of the array: " << sum << "\n";
+
+	Sleep(500);
+	system("pause");
+	system("cls");
+
+	cout << "Source array:\n";
+	for (int j = 0; j < n; j++)
+	{
+		Sleep(50);
+		++number;
+		cout << number << ". array [" << j << "] - ";
+		cout << a[j] << "\n";
+	}
+	number = 0;
+
+	Sleep(500);
+	cout << "\nSwapped elements, now they are under different names:\n";
+	for (int i = 0; i < n; i++)
+	{
+		if (a[i] < a[min])
+			min = i;
+		if (a[i] > a[max])
+			max = i;
+	}
+	temp = a[min];
+	a[min] = a[max];
+	a[max] = temp;
+	temp = 0;
+
+	cout << "\n";
+
+	for (int i = 0; i < n; i++)
+	{
+		Sleep(50);
+		++number;
+		cout << number << ". array [" << i << "] - ";
+		cout << a[i] << "\n";
+	}
+
+	imin = 0;
+	imax = 0;
+	min_arr = a[0];
+	max_arr = a[0];
+	for (int i = 0; i < n; i++)
+	{
+		if (fabs(a[i]) <= fabs(min_arr))
+		{
+			min_arr = a[i];
+			imin = i + 1;
+		}
+		if (fabs(a[i]) >= fabs(max_arr))
+		{
+			max_arr = a[i];
+			imax = i + 1;
+		}
+	}
+	Sleep(500);
+	cout << "\nMinimum module element number = " << imin << "\n";
+	Sleep(500);
+	cout << "\nMaximum module element number = " << imax << "\n";
+	min_arr = 0;
+	max_arr = 0;
+
+
+	Sleep(500);
+	system("pause");
+	system("cls");
+
+	Sleep(500);
+	number = 0;
+	cout << "We will remove negative numbers. ";
+	cout << "\nIn conclusion, let's change the array in ascending order :";
+
+	for (int i = 0; i < n; i++)
+	{
+		if (a[i] < 0)
+			a[i] *= a[i];
+	}
+
+	for (int i = 0; i + 1 <= n - 1; ++i)
+	{
+		for (int j = 0; j < n - i - 1; ++j)
+		{
+			if (j + 1 <= n)
+			{
+				if (a[j] > a[j + 1])
+				{
+					temp = a[j];
+					a[j] = a[j + 1];
+					a[j + 1] = temp;
+				}
+			}
+
+			else {
+				break;
+			}
+		}
+	}
+	Sleep(500);
+	for (int i = 0; i < n; i++)
+	{
+		Sleep(50);
+		cout << "\n";
+		++number;
+		cout << number << ". array [" << i << "] - ";
+		cout << a[i] << " ";
+	}
+	cout << "\n";
+
+	Sleep(500);
+	system("pause");
+	system("cls");
+
+	return 0;
+}

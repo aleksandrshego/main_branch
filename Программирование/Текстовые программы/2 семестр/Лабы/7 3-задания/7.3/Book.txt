@@ -1,0 +1,39 @@
+#include "Book.h"
+
+void Book::GetAuthors(list<Author>& list) const
+{
+	list.clear();
+	list.assign(authors.begin(), authors.end());
+}
+
+void Book::SetAuthors(list<Author>& list)
+{
+	authors.clear();
+	authors.assign(list.begin(), list.end());
+}
+
+bool Book::operator<(const Book& a) const
+{
+	return title < a.title;
+}
+
+bool Book::operator>(const Book& a) const
+{
+	return title > a.title;
+}
+
+bool Book::operator==(const Book& a) const
+{
+	return title == a.title;
+}
+
+ostream& operator<<(ostream& out, const Book& a)
+{
+	cout << "Название книги: " << a.title << "\n";
+	cout << "Год издания: " << a.year << "\n";
+	cout << "УДК: " << a.udk << "\n";
+	cout << "Авторы:\n";
+	for (auto it = a.authors.begin(); it != a.authors.end(); ++it)
+		out << "\t" << *it << "\n";
+	return out;
+}

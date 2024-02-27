@@ -1,0 +1,75 @@
+/*
+	Найти произведение нечетных цифр целого числа N.
+*/
+
+#include <iostream>
+
+using namespace std;
+
+int main()
+{
+	int in, result, ten = 10, two = 2, i{0};
+
+	cin >> in;
+
+	if (in == 0)
+		cout << 0;
+	else
+	{
+		__asm
+		{
+			xor eax, eax
+			xor edx, edx
+			xor ecx, ecx
+			xor ebx, ebx
+			xor esi, esi
+			mov ebx, 1
+
+			mov eax, in
+
+		start:
+			cmp eax, 0
+			je fin
+			div ten
+
+			mov ecx, eax // частное сохраняем в другом регистре 
+			xor eax, eax
+			mov eax, edx
+			mov esi, edx // отправляем копию остатка для того, чтобы с ней потом работать
+			xor edx, edx
+			div two
+
+			cmp edx, 0
+			je L1
+			jne L2
+
+		L1:
+			xor edx, edx
+			xor eax, eax
+			xor esi, esi
+			mov eax, ecx
+			xor ecx, ecx
+			jmp start
+
+		L2:
+			xor edx, edx
+			xor eax, eax
+			mov eax, ebx
+			xor ebx, ebx
+			mov ebx, esi
+			xor esi, esi
+			mul ebx
+			xor ebx, ebx
+			mov ebx, eax
+			xor eax, eax
+			mov eax, ecx
+			xor ecx, ecx
+			jmp start
+		fin:
+			mov result, ebx
+		}
+		cout << result;
+	}
+	return EXIT_SUCCESS;
+}
+

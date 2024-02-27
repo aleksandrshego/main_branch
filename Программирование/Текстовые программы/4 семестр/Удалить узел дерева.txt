@@ -1,0 +1,104 @@
+#include <iostream>
+#include <vector>
+#include <fstream>
+
+using namespace std;
+
+class binary_three {
+protected:
+	binary_three* left, * right;
+	long long value = 0;
+	binary_three*& find_min_node(binary_three*& root);
+
+public:
+	binary_three();
+	binary_three(long long value);
+	void insert_node(binary_three*& root, const long long& n_value);
+	void delete_node_al(binary_three*& root, const long long& d_value);
+	friend ostream& operator<< (ostream& out, binary_three*& three);
+};
+
+binary_three::binary_three() : left(nullptr), right(nullptr) {}
+
+binary_three::binary_three(long long value) : left(nullptr), right(nullptr), value(value) {}
+
+void binary_three::insert_node(binary_three*& root, const long long& n_value)
+{
+	if (!root)
+		root = new binary_three(n_value);
+	else if (n_value > root->value) {
+		if (!root->right)
+			root->right = new binary_three(n_value);
+		else
+			insert_node(root->right, n_value);
+	}
+	else if (n_value < root->value) {
+		if (!root->left)
+			root->left = new binary_three(n_value);
+		else
+			insert_node(root->left, n_value);
+	}
+}
+
+void binary_three::delete_node_al(binary_three*& root, const long long& d_value)
+{
+	if (!root) return;
+	else if (d_value < root->value)
+		delete_node_al(root->left, d_value);
+	else if (d_value > root->value)
+		delete_node_al(root->right, d_value);
+	else if (d_value == root->value)
+	{
+		if (!root->left && !root->right)
+			root = nullptr;
+		else if (!root->left && root->right)
+		{
+			root = root->right;
+		}
+		else if (root->left && !root->right)
+		{
+			root = root->left;
+		}
+		else if (root->left && root->right)
+		{
+			const binary_three* min_node = find_min_node(root->right);
+			root->value = min_node->value;
+			delete_node_al(root->right, min_node->value);
+		}
+	}
+}
+
+binary_three*& binary_three::find_min_node(binary_three*& root)
+{
+	if (!root->left) return root;
+	return find_min_node(root->left);
+}
+
+ostream& operator<<(ostream& out, binary_three*& three) // левый обход
+{
+	if (!three) return out;
+	out << three->value << "\n";
+	out << three->left;
+	out << three->right;
+	return out;
+}
+
+
+int main() {
+	ifstream fin("input.txt");
+	ofstream fout("output.txt");
+
+	binary_three* root = nullptr;
+	long long val;
+	long long val_del;
+
+	fin >> val_del;
+
+	while (fin >> val)
+		root->insert_node(root, val);
+
+	root->delete_node_al(root, val_del);
+
+	fout << root;
+	return 0;
+}

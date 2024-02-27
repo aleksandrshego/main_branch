@@ -1,0 +1,251 @@
+#include "List_double.h"
+
+List_double::List_double()
+{
+    begin = end = nullptr;
+    count = 0;
+}
+
+List_double::List_double(const List_double& obj)
+{
+    Clear();
+    Element_double* t = obj.begin;
+    while (t != nullptr)
+    {
+        AddEnd(&t->data);
+        t = t->next;
+    }
+}
+
+List_double& List_double::operator=(const List_double& obj)
+{
+    Copy(obj);
+    return *this;
+}
+
+int List_double::GetCount()
+{
+    return count;
+}
+
+void List_double::AddBegin(void* data)
+{
+    try
+    {
+        Element_double* t = new Element_double;
+        t->data = *((double*)data);
+        t->prev = nullptr;
+        t->next = begin;
+
+        if (count == 0)
+            begin = end = t;
+        else
+        {
+            begin->prev = t;
+            begin = t;
+        }
+        count++;
+    }
+    catch (bad_alloc ex) // если не выделится память
+    {
+        cout << ex.what() << "\n";
+    }
+}
+
+void List_double::AddEnd(void* data)
+{
+    try
+    {
+        Element_double* t = new Element_double;
+        t->data = *((double*)data);
+        t->next = nullptr;
+        t->prev = end;
+
+        if (count == 0)
+        {
+            end = begin = t;
+        }
+        else
+        {
+            end->next = t;
+            end = t;
+        }
+        count++;
+    }
+    catch (bad_alloc ex)
+    {
+        cout << ex.what() << "\n";
+    }
+}
+
+void List_double::Print()
+{
+    if (count == 0)
+        cout << "List is empty.\n";
+    else
+    {
+        Element_double* t = begin;
+        for (int i = 0; i < count; i++)
+        {
+            cout << t->data << " ";
+            t = t->next;
+        }
+        cout << "\n";
+    }
+}
+
+void List_double::SetElement(void* data, int index)
+{
+    try
+    {
+        CorrectIndex(index);
+
+        Element_double* t = Move(index);
+        t->data = *((double*)data);
+    }
+    catch (exception& ex)
+    {
+        cout << ex.what() << "\n";
+    }
+}
+
+void* List_double::GetElement(int index)
+{
+    try
+    {
+        CorrectIndex(index);
+
+        Element_double* t = Move(index);
+
+        void* k = &(t->data);
+
+        return k;
+    }
+    catch (exception& ex)
+    {
+        cout << ex.what() << "\n";
+    }
+}
+
+void List_double::Insert(void* data, int index)
+{
+    try
+    {
+        if (index > count)
+            throw exception("The index is larger than the dimension.");
+        if (count == index)
+        {
+            AddEnd(data);
+            return;
+        }
+        if (index == 0)
+        {
+            AddBegin(data);
+            return;
+        }
+
+        Element_double* t = new Element_double;
+        t->data = *((double*)data);
+
+        Element_double* prev = Move(index - 1);
+        Element_double* next = prev->next;
+
+        t->prev = prev;
+        prev->next = t;
+        t->next = next;
+        next->prev = t;
+
+        count++;
+    }
+    catch (bad_alloc ex)
+    {
+        cout << ex.what() << "\n";
+    }
+    catch (exception& ex)
+    {
+        cout << ex.what() << "\n";
+    }
+}
+
+void List_double::Delete(int index)
+{
+    try
+    {
+        CorrectIndex(index);
+        if (count == 0)
+            return;
+
+        Element_double* t = Move(index);
+        Element_double* prev = t->prev;
+        Element_double* next = t->next;
+
+        if ((count > 1) && (prev != nullptr))
+            prev->next = next;
+        if ((count > 1) && (next != nullptr))
+            next->prev = prev;
+        if (index == 0)
+            begin = next;
+        if (index = count - 1)
+            end = prev;
+
+        delete t;
+        count--;
+    }
+    catch (exception& ex)
+    {
+        cout << ex.what() << "\n";
+    }
+}
+
+void List_double::Copy(const List_double& obj)
+{
+    Clear(); // очищаем список, чтобы копировать содержимое другого списка
+
+    Element_double* t = obj.begin;
+
+    while (t != nullptr)
+    {
+        AddEnd(&(t->data));
+        t = t->next;
+    }
+}
+
+void List_double::Reverse()
+{
+    List_double L;
+    Element_double* t = begin;
+    while (t != nullptr)
+    {
+        L.AddBegin(&(t->data));
+        t = t->next;
+    }
+
+    *this = L;
+}
+
+void List_double::Clear()
+{
+    int n = count; // сделали копию, так как count меняется при удалении, следовательно, появится ошибка
+    for (int i = 0; i < n; i++)
+        Delete(0);
+}
+
+void List_double::CorrectIndex(int index)
+{
+    if (index >= count)
+        throw exception("The index is larger than the dimension.");
+}
+
+Element_double* List_double::Move(int index)
+{
+    Element_double* t = begin;
+
+    for (int i = 0; i < index; i++)
+        t = t->next;
+    return t;
+}
+
+List_double::~List_double()
+{
+    Clear();
+}

@@ -1,0 +1,16 @@
+class Foo
+{
+public:
+	void operator()(const string& word) const
+	{
+		if (word[0] == 'a')
+			cout << word << "\n";
+	}
+};
+
+int main()
+{
+	vector <string> words = { "allay", "dsa", "ammo", "sda", "mad_buter", "killing_spree", "adams_buter" };
+	for_each(words.begin(), words.end(), Foo());
+	return 0;
+}

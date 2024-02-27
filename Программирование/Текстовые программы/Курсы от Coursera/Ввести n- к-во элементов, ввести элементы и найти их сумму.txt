@@ -1,0 +1,20 @@
+#include <iostream>
+using namespace std;
+int main() {
+	setlocale(LC_ALL, "rus");
+	int n; double sum{ 0.0 }, k{ 0.0 };
+	cout << "\nВведите n - кол-во элементов: "; cin >> n;
+	if (n > 0) {
+		cout << "\nВведите элементы: ";
+		while (n != 0) {
+			cout << "\n- "; cin >> k;
+			sum += k;
+			n--;
+		}
+		cout << "Сумма чисел равна: " << sum;
+	}
+	else {
+		cout << "\nСумма чисел равна 0.\n";
+	}
+	return 0;
+}

@@ -1,0 +1,28 @@
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+int main()
+{
+	int step = 0;
+	string fe;
+	cin >> fe;
+	for (int i = 0; i <= fe.length(); i++)
+	{
+		if (fe[i] == 'f')
+		{
+			step++;
+			if (step == 2)
+			{
+				cout << i;
+				return 0;
+			}
+		}
+	}
+	if (step == 1)
+		cout << "-1";
+	else
+		cout << "-2";
+	return 0;
+}

@@ -1,0 +1,25 @@
+#include <iostream>
+using namespace std;
+int main()
+{
+    setlocale(LC_ALL, "Russian");
+    int n;
+    cout << "Введите число n = ";
+    cin >> n;
+    cout << endl;
+    if (n == 0) {
+        cout << "Введено не натуральное число" << endl;
+    }
+    else {
+        double s{ 0 }, j{ 0 }, k{ 1 };
+        int h;
+        for (int i = 1; i <= n; i++) {
+            for (h = 1; h <= i; h++) {
+                k *= h;
+            }
+            s += k;
+        }
+        cout << "Сумма чисел от 1 до " << n << " равна " << s << endl;
+    }
+    return 0;
+}

@@ -1,0 +1,80 @@
+#include <iostream>
+#include <windows.h>
+using namespace std;
+
+int main()
+{
+    int i{}, j{}, number{ 0 }, rows{}, columns{}, step = 0, sum{ 0 }, matrix_num{ 0 };
+
+    cout << "What kind of quadratic matrix do you want to see (enter a number) - ";
+    cin >> matrix_num;
+    columns = matrix_num;
+    rows = matrix_num;
+
+    int** a = new int* [rows];
+    for (i = 0; i < rows; i++)
+        a[i] = new int[columns];
+
+    number = rows * columns;
+
+    do
+    {
+        for (i = step; i < rows - step; i++)
+            if (number < 1)
+                break;
+            else
+                a[i][step] = number--;
+
+        for (j = step + 1; j < columns - step; j++)
+            if (number < 1)
+                break;
+            else
+                a[rows - step - 1][j] = number--;
+
+        for (i = rows - step - 2; i >= step; i--)
+            if (number < 1)
+                break;
+            else
+                a[i][columns - step - 1] = number--;
+
+        for (j = columns - step - 2; j >= step + 1; j--)
+            if (number < 1)
+                break;
+            else
+                a[step][j] = number--;
+
+        step++;
+    } while (number > 0);
+
+    // output
+    cout << "\nMatrix output:\n";
+    for (i = 0; i < rows; i++)
+    {
+        for (j = 0; j < columns - 1; j++)
+        {
+            Sleep(20);
+            cout << a[i][j] << "\t";
+        }
+        Sleep(20);
+        cout << a[i][columns - 1] << "\n";
+    }
+
+    j = step = 0;
+
+    for (i = rows - 1; i >= 0; i--)
+    {
+        j = step;
+        for (j; j < columns; j++)
+            sum += a[i][j];
+        step++;
+    }
+    Sleep(100);
+    cout << "\nThe sum of the lower right triangle is - " << sum << "\n";
+
+    for (i = 0; i < rows; i++)
+        delete[] a[i];
+    delete[] a;
+
+    system("pause");
+    return 0;
+}

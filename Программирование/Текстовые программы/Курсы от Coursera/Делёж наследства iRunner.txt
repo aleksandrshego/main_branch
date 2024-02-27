@@ -1,0 +1,24 @@
+#include <iostream>
+
+using namespace std;
+
+int main()
+{
+	unsigned int max, min, ost;
+	short N;
+	cin >> N >> ost;
+	if ((ost % (N - 1)) == 0)
+	{
+		min = ost + ceil((double)ost / (N - 1)) - 1;
+		max = min + 1;
+	}
+	else if ((ost % (N - 1)) != 0)
+	{
+		min = ost + ceil((double)ost / (N - 1)) - 1;
+		max = min;
+	}
+	else if (ost == (N - 1))
+		min = max = N;
+	cout << min << " " << max;
+	return 0;
+}

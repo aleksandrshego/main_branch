@@ -1,0 +1,30 @@
+#include <iostream>
+#include <cmath>
+using namespace std;
+int main()
+{
+	setlocale(LC_ALL, "rus");
+	double x = 0, t = 0, sum = 0, k = 1, eps = 0;
+	cout << "Введите x: ";
+	cin >> x;
+	cout << "Введите e: ";
+	cin >> eps;
+	double res = sinh(x);
+	if ((eps >= 1) || (eps <= 0))
+	{
+		cout << "Ошибка";
+	}
+	else
+	{
+		t = x;
+		while (fabs(t) >= eps)
+		{
+			sum += t;
+			t = t * x * x / (2 * k * (2 * k + 1));
+			k++;
+		}
+		cout << "sinh(" << x << ") = " << sum << "\n";
+		cout << "sinh(x) = " << res;
+	}
+	return 0;
+}

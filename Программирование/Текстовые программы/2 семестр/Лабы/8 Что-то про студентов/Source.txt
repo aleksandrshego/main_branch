@@ -1,0 +1,382 @@
+#include <iostream>
+#include <algorithm>
+#include <sstream>
+#include <fstream>
+#include <vector>
+#include <map>
+#include <Windows.h>
+#include <conio.h>
+#include <cctype>
+/*
+! не предусмотрен вариант с отсутствием предметов, то есть челове кпросто посещает занятия, но
+у него отсутсвуют отметки, сделовательно нужно делать проверку на оценки, то есть на сам вектор, также
+добавить в расчёте среднего балла тот вариант, что вектор пустой, следовательно, просто будет сразу средний балл
+приравниваться к нулю, или return
+*/
+using namespace std;
+
+#define sys system("pause"); system("cls")
+#define cls system("cls")
+#define pause system("pause")
+
+struct SMark
+{
+	string subject = ""; //предмет
+	int mark = 0; //оценка
+};
+
+struct SStudData
+{
+	string name = ""; //фамилия, инициалы
+	int number = 0; //номер зачетки
+	vector <SMark> marks; //рез-ты сессии
+	double average_score = 0.0; // средний балл
+	
+	friend ostream& operator<< (ostream& out, const SStudData& data)
+	{
+		out << "Имя - " << data.name << ", номер зачётки - " << data.number << ".\n\tСредний балл - " << data.average_score;
+		out << "\n\tРезультаты сессии:\n";
+		for (int i = 0; i < data.marks.size(); ++i)
+			out << "\t\t" << data.marks[i].subject << " " << data.marks[i].mark << "\n";
+		return out;
+	}
+};
+
+void print(const map<int, SStudData>& st)
+{
+	for (const auto& k : st)
+		cout << k.second << "\n";
+}
+
+void print(const vector<SStudData>& st)
+{
+	for (int i = 0; i < st.size(); ++i)
+		cout << i + 1 << ". " << st[i] << "\n";
+}
+
+void prov_reading(ifstream& file)
+{
+	if (!file.is_open())
+		throw exception("Ошибка открытия файла.");
+	if (file.peek() == EOF)
+		throw exception("Файл пуст.");
+}
+
+void counting_average(SStudData& sd)
+{
+	for (int i = 0; i < sd.marks.size(); ++i)
+		sd.average_score += sd.marks[i].mark;
+	sd.average_score /= sd.marks.size();
+}
+
+void lower_string(string& s)
+{
+	for (int i = 0; i < s.size(); ++i)
+		s[i] = tolower(s[i]);
+}
+
+void filling_map(const string& str, map<int, SStudData>& student)
+{
+	if (!str.empty() && str[0] != ' ')
+	{
+		istringstream ist(str);
+		string input;
+		SStudData sdata;
+		SMark data;
+		register int i = 0;
+		while (ist >> sdata.name)
+		{
+			ist >> sdata.number;
+			ist >> input;
+			do {
+				lower_string(input);
+				data.subject = input;
+				if (!(ist >> input))
+					throw exception("Не хватает элемента ещё одного элемента в текстовом файле.");
+				data.mark = stoi(input);
+				sdata.marks.push_back(data);
+			} while (ist >> input);
+		}
+		counting_average(sdata);
+		student.insert({ sdata.number, sdata });
+	}
+}
+
+void reading_file(map<int, SStudData>& st)
+{
+	try
+	{
+		ifstream fin("Stduents.txt");
+		prov_reading(fin);
+
+		string str;
+		while (getline(fin, str))
+			filling_map(str, st);
+
+		fin.close();
+	}
+	catch (exception& ex)
+	{
+		cout << ex.what() << "\n";
+	}
+}
+
+void print_sorted_students(const map<int, SStudData>& st)
+{
+	vector<SStudData> students;
+	for (const auto& k : st)
+		students.push_back(k.second);
+	sort(students.begin(), students.end(), 
+		[](const SStudData& a, const SStudData& b) 
+		{	
+			string name_a = a.name, name_b = b.name;
+			lower_string(name_a); lower_string(name_b);
+			if (name_a == name_b)
+				return a.average_score > b.average_score;
+			return name_a < name_b;
+		}
+	);
+	cout << "Список отсортированных студентов:\n";
+	print(students);
+}
+
+void print_diapazon_average(const map<int, SStudData>& st)
+{
+	double a, b;
+	cout << "Введите диапазон среднего балла: "; cin >> a >> b;
+	if (a > b)
+		swap(a, b);
+	cls;
+	vector<SStudData> students;
+	for (const auto& k : st)
+		if (k.second.average_score >= a && k.second.average_score <= b)
+			students.push_back(k.second);
+	sort(students.begin(), students.end(),
+		[](const SStudData& a, const SStudData& b)
+		{
+			if (a.average_score == b.average_score)
+			{
+				string name_a = a.name, name_b = b.name;
+				lower_string(name_a); lower_string(name_b);
+				return name_a < name_b;
+			}
+			return a.average_score > b.average_score;
+		}
+	);
+	if (students.size() == 0)
+		cout << "Студенты со средним баллом от " << a << " до " << b << " отсутсвуют.\n";
+	else
+	{
+		cout << "Список студентов со средним баллом от " << a << " до " << b << ":\n";
+		print(students);
+	}
+}
+
+void print_subjects_student(const map<int, SStudData>& st)
+{
+	string subject;
+	cout << "Введите предмет: ";  cin >> subject;
+	cls;
+	vector<SStudData> students;
+	for (const auto& k : st)
+		for (int i = 0; i < k.second.marks.size(); ++i)
+			if (subject == k.second.marks[i].subject)
+			{
+				students.push_back(k.second);
+				break;
+			}
+	if (students.size() == 0)
+		cout << "Студенты, которые сдавали предмет \"" << subject << "\" отсутствуют.\n";
+	else
+	{
+		cout << "Список студентов, которые сдавали предмет \"" << subject << "\":\n";
+		print(students);
+	}
+}
+
+void print_subjects(const map<int, SStudData>& st)
+{
+	map <string, int> sub_stud;
+	for (const auto& k : st)
+		for (int i = 0; i < k.second.marks.size(); ++i)
+			sub_stud[k.second.marks[i].subject]++;
+
+	cout << "Список предметов и количество сдававших студентов:\n";
+	for (const auto& k : sub_stud)
+		cout << "\t" << k.first << " " << k.second << "\n";
+}
+
+void print_average_subjects(const map<int, SStudData>& st)
+{
+	vector<pair<string, double>> subjects;
+	map<string, int> count_subjects;
+	map<string, double> average_mark_subject;
+	for (const auto& k : st) // заполнение и подсчёт сколько вообще сдавало определённый предмет, а потом находим стреднее арифметическое
+		for (int i = 0; i < k.second.marks.size(); ++i)
+		{
+			average_mark_subject[k.second.marks[i].subject] += k.second.marks[i].mark;
+			count_subjects[k.second.marks[i].subject]++;
+		}
+
+	for (auto& k : average_mark_subject)
+	{
+		k.second /= count_subjects[k.first];
+		subjects.push_back({ k.first, k.second });
+	}
+	sort(subjects.begin(), subjects.end(),
+		[](const pair<string, double>& a, const pair<string, double>& b)
+		{ return a.second > b.second; }
+	);
+
+	cout << "Предметы и их средние баллы:\n";
+	for (const auto& k : subjects)
+		cout << "\t" << k.first << " - " << k.second << "\n";
+}
+
+void print_max_marks_students(const map<int, SStudData>& st)
+{
+	int max_sum_marks = 0;
+	multimap<int, SStudData> student_marks;
+	for (const auto& k : st)
+	{
+		int temp_sum_marks = 0;
+		for (int i = 0; i < k.second.marks.size(); ++i)
+		{
+			temp_sum_marks += k.second.marks[i].mark;
+		}
+		if (temp_sum_marks > max_sum_marks)
+			max_sum_marks = temp_sum_marks;
+		student_marks.insert(make_pair(temp_sum_marks, k.second));
+	}
+	
+	cout << "Максимальная сумма баллов - " << max_sum_marks << ".\n";
+	cout << "\nСтуденты имеющие максимальную сумму баллов:\n";
+	for (const auto& k : student_marks)
+		if (k.first == max_sum_marks)
+			cout << k.second;
+}
+
+void print_student_with_bad_marks(const map<int, SStudData>& st)
+{
+	vector<SStudData> bad_marks_student;
+	for (const auto& k : st)
+		for (int i = 0; i < k.second.marks.size(); ++i)
+			if (k.second.marks[i].mark <= 3 && k.second.marks[i].mark >= 1)
+			{
+				bad_marks_student.push_back(k.second);
+				break;
+			}
+	if (bad_marks_student.size() == 0)
+		cout << "Студенты, имеющие неудовлетворительные отметки, отсутстуют.\n";
+	else
+	{
+		cout << "Студенты, имеющие неудовлетворительные отметки:\n";
+		print(bad_marks_student);
+	}
+}
+
+void menu(const map<int, SStudData>& students)
+{
+	cout << "Выберите один из пунктов:\n\t1. Вывести список студентов;\n\t2. Вывести отсортированный список студентов;\n\t3. Вывести список студентов с заданным диапазоном среднего балла;\n\t4. Вывести список студентов, которые сдавали введённый вами предмет;\n\t";
+	cout << "5. Вывести список предметов и количество студентов, которые их сдавали;\n\t6. Вывести список предметов и средний балл по каждому из них;\n\t7. Вывести список студентов, имеющие маскимальную сумму баллов;\n\t8. Вывести список студетов, имеющие неудовлетворительные отметки (1,2,3)\n\t";
+	cout << "Нажмите q, если желаете завершить.\n";
+	switch (_getch())
+	{
+	case '1':
+	{
+		cls;
+		cout << "Список студентов:\n";
+		print(students); // 1-3 
+		sys;
+		menu(students);
+		break;
+	}
+	case '2':
+	{
+		cls;
+		print_sorted_students(students); //4
+		sys;
+		menu(students);
+		break;
+	}
+	case '3':
+	{
+		cls;
+		print_diapazon_average(students); //5
+		sys;
+		menu(students);
+		break;
+	}
+	case '4':
+	{
+		cls;
+		print_subjects_student(students); //6
+		sys;
+		menu(students);
+		break;
+	}
+	case '5':
+	{
+		cls;
+		print_subjects(students); //7
+		sys;
+		menu(students);
+		break;
+	}
+	case '6':
+	{
+		cls;
+		print_average_subjects(students); //8
+		sys;
+		menu(students);
+		break;
+	}
+	case '7':
+	{
+		cls;
+		print_max_marks_students(students); //9
+		sys;
+		menu(students);
+		break;
+	}
+	case '8':
+	{
+		cls;
+		print_student_with_bad_marks(students); //10
+		sys;
+		menu(students);
+		break;
+	}
+	case 113:
+	{
+		cls;
+		cout << "Конец\n";
+		break;
+	}
+	case 233:
+	{
+		cls;
+		cout << "Конец\n";
+		break;
+	}
+	default:
+	{
+		cout << "Ошибка, повторите ещё раз.\n";
+		sys;
+		menu(students);
+	}
+	}
+}
+
+int main()
+{
+	setlocale(0, "rus");
+	SetConsoleCP(1251);	
+	SetConsoleOutputCP(1251);
+
+	map<int, SStudData> students;
+	reading_file(students);
+	menu(students);
+	
+	return 0;
+}

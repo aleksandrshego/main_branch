@@ -1,0 +1,26 @@
+#include <iostream>
+using namespace std;
+
+
+int Factorial(int x)
+{
+	int sum = 1;
+	if (x < 0)
+	{
+		sum = 1;
+	}
+	else
+		for (int i = 1; i <= x; i++)
+		{
+			sum *= i;
+		}
+	return sum;
+}
+
+int main()
+{
+	int a;
+	cin >> a;
+	cout << Factorial(a);
+	return 0;
+}

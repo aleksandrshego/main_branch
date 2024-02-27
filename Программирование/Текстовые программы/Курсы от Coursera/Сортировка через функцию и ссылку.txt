@@ -1,0 +1,22 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+void Sort(vector <int>& v)
+{
+	sort(begin(v), end(v));
+}
+
+int main()
+{
+	vector <int> nums = { 3, 6, 1, 2, 0, 2 };
+	Sort(nums);
+	for (auto i : nums)
+	{
+		cout << i << " ";
+	}
+	return 0;
+}

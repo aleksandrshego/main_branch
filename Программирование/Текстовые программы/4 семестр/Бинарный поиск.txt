@@ -1,0 +1,60 @@
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+vector <int> a;
+
+bool b_search(int L, int R, int x)
+{
+	while (L < R)
+	{
+		int C = (L + R) / 2;
+		if (a[C] == x)
+			return true;
+		if (a[C] < x)
+			L = C + 1;
+		else
+			R = C;
+	}
+	return false;
+}
+
+int l_bound(int L, int R, int x)
+{
+	while (L < R)
+	{
+		int C = (L + R) / 2;
+		if (a[C] < x)
+			L = C + 1;
+		else
+			R = C;
+	}
+	return L;
+}
+
+int u_bound(int L, int R, int x)
+{
+	return l_bound(L, R, x + 1);
+}
+
+int main()
+{
+	ios_base::sync_with_stdio(0); cin.tie(0);
+	int n, m;
+	cin >> n;
+	a.resize(n);
+	for (int i = 0; i < n; ++i)
+		cin >> a[i];
+	cin >> m;
+	for (int i = 0; i < m; ++i)
+	{
+		int x;
+		cin >> x;
+		cout << b_search(0, n, x) << " ";
+		cout << l_bound(0, n, x) << " ";
+		cout << u_bound(0, n, x) << "\n";
+	}
+
+	return EXIT_SUCCESS;
+}

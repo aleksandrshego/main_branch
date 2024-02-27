@@ -1,0 +1,30 @@
+#include <iostream>
+#include <string>
+#include <iomanip>
+
+using namespace std;
+
+int main()
+{
+	int N;
+	double long K;
+	string str;
+	cin >> N;
+	cout << setprecision(N) << fixed;
+	cin >> K;
+	if ((int)K % 7 == 0)
+	{
+		cout << 0;
+		return 0;
+	}
+	K /= 7;
+	K = K - (int)K;
+	str += to_string(K);
+	if (N > 6)
+	{
+		while (N > 6)
+			N -= 6;
+	}
+	cout << str[N+1];
+	return 0;
+}

@@ -1,0 +1,85 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <iomanip>
+
+using namespace std;
+
+int main()
+{
+    setlocale(LC_ALL, "rus");
+    ifstream fin;
+    ofstream fout;
+    int n = 2, rows, columns;
+    int* arr = new int[n];
+
+    fin.open("IN.txt");
+    fout.open("out.txt");
+
+    if (!fin.is_open())
+    {
+        cout << "Ошибка fin.\n";
+    }
+    else if (!fout.is_open())
+    {
+        cout << "Ошибка fout.\n";
+    }
+    else
+    {
+        cout << "Файлы открыты.\n";
+        if (fin.peek() != EOF)
+            cout << "\nФайл не пустой.\n";
+        else
+        {
+            cout << "\nОшибка. Файл пустой.\n";
+
+            fout.close();
+            fin.close();
+
+            return 0;
+        }
+        string str;
+        //int i = 0;
+        //while (fin >> arr[i])
+        //{
+        //    cout << arr[i] << " ";
+        //    i++;
+        //}
+        int x, y;
+        while (fin >> x >> y)
+        {
+            fout << x << setw(3) << y;
+        }
+      /*rows = arr[0];
+        columns = arr[1];*/
+
+        rows = x;
+        columns = y;
+
+
+        fout << "\n";
+        int** mtr = new int* [rows];
+        for (int i = 0; i < rows; i++)
+            mtr[i] = new int[columns];
+        int value = rows * columns;
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < columns; j++)
+            {
+                mtr[i][j] = value;
+                value--;
+                fout << mtr[i][j] << setw(5);
+            }
+            fout << "\n";
+        }
+       // delete[] arr;
+        for (int i = 0; i < rows; i++)
+            delete[] mtr[i];
+        delete[] mtr;
+            cout << "\nПрограмма завершена успешно.\n";
+    }
+    fout.close();
+    fin.close();
+    return 0;
+}
+

@@ -1,0 +1,79 @@
+#include <iostream>
+#include <windows.h>
+#include <conio.h>
+
+using namespace std;
+ 
+BOOL RunProcess(const char *lpApplicationName, DWORD dwWaitMilliseconds)
+{
+ 
+    STARTUPINFOA si;
+    PROCESS_INFORMATION pi;
+ 
+    ZeroMemory(&si, sizeof(si));
+    ZeroMemory(&pi, sizeof(pi));
+ 
+    si.cb = sizeof(si);
+ 
+    if ( !CreateProcessA(NULL, const_cast<LPSTR>(lpApplicationName), NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi) )
+    {
+        std::cout << "CreateProcess failed [" << GetLastError() << "]\n";
+        return FALSE;
+    }
+ 
+ 
+    WaitForSingleObject(pi.hProcess, dwWaitMilliseconds);
+ 
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+ 
+    return TRUE;
+}
+ 
+int main()
+{
+    int x = 196;
+    for (int i = 0; i < 50; i++)
+    { 
+        cout << (char)x;
+    }
+    cout << "\nChoose one of the options (from 1 to 3).\n";
+    for (int i = 0; i < 50; i++)
+    {
+        cout << (char)x;
+    }
+tryAgain:
+    switch (_getch())
+    {
+    case '1':
+    {
+        cout << "\nYou have chosen a task on a matrix with a cipher.\n";
+        Sleep(200);
+        std::string pname = "D:\\На флешку\\Проги\\Матрица из слов\\Debug\\Матрица из слов.exe";
+        RunProcess(pname.c_str(), INFINITE);
+        break;
+    }
+    case '2':
+    {
+        cout << "\nYou have chosen laboratory task number 3.\n";
+        Sleep(200);
+        std::string pname = "D:\\На флешку\\Проги\\Лаба 3-я\\Лабораторная работа №3. Вариант 10\\Debug\\Лабораторная работа №3. Вариант 10.exe";
+        RunProcess(pname.c_str(), INFINITE);
+        break;
+    }
+    case '3':
+    {
+        cout << "\nYou have chosen laboratory task number 4.\n";
+        Sleep(200);
+        std::string pname = "D:\\На флешку\\Проги\\Лабораторная работа №4. Вариант 10\\Debug\\Лабораторная работа №4. Вариант 10.exe";
+        RunProcess(pname.c_str(), INFINITE);
+        break;
+    }
+    default:
+    {
+        cout << "\nError, please try again.\n";
+            goto tryAgain;
+    }
+   }
+    return 0;
+}

@@ -1,0 +1,42 @@
+Я сделал её по урокам вот так:
+#include <iostream>
+#include <fstream>
+#include <string>
+
+using namespace std;
+
+int main()
+{
+  setlocale(LC_ALL, "rus");
+  ifstream fin;
+  ofstream fout;
+
+  fin.open("Source.cpp");
+  fout.open("out.txt");
+
+  if (!fin.is_open())
+  {
+    cout << "Ошибка fin.\n";
+  }
+  if (!fout.is_open())
+  {
+    cout << "Ошибка fout.\n";
+  }
+  else
+  {
+    cout << "Файлы открыты.\n";
+    string str;
+    while (!fin.eof())
+    {
+      str = "";
+      getline(fin, str);
+      fout << str;
+      fout << "\n";
+    }
+    cout << "-----------------------------------------";
+    cout << "\nКопирование завершено. Хорошего дня.\n";
+  }
+  fout.close();
+  fin.close();
+  return 0;
+}

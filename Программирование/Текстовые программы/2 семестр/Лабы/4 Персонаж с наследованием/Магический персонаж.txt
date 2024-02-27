@@ -1,0 +1,100 @@
+#include "MagicPerson.h"
+
+MagicPerson::MagicPerson() :Person()
+{
+	magic_sessions = nullptr;
+	quantity_sessions = 0;
+	max_mana = 0;
+	current_mana = 0;
+}
+
+MagicPerson::MagicPerson(const string name, const condition cond, const race r, unsigned int max_mana, unsigned int current_mana, unsigned short quantity_sessions) : Person(name, cond, r)
+{
+	this->max_mana = max_mana;
+	assert(current_mana <= max_mana);
+	this->current_mana = current_mana;
+	assert(quantity_sessions >= 0 && quantity_sessions <= 12);
+	this->quantity_sessions = quantity_sessions;
+	magic_sessions = new size_t[quantity_sessions];
+}
+
+MagicPerson::MagicPerson(const MagicPerson& a) : Person(a)
+{
+	max_mana = a.max_mana;
+	current_mana = a.current_mana;
+	quantity_sessions = a.quantity_sessions;
+	if (quantity_sessions == 0)
+		magic_sessions == nullptr;
+	else
+	{
+		magic_sessions = new size_t[quantity_sessions];
+		for (int i = 0; i < quantity_sessions; i++)
+			magic_sessions[i] = a.magic_sessions[i];
+	}
+}
+
+void MagicPerson::set_max_mana(unsigned int& max_mana)
+{
+	this->max_mana = max_mana;
+}
+
+unsigned int MagicPerson::get_max_mana()
+{
+	return max_mana;
+}
+
+void MagicPerson::set_current_mana(unsigned int& current_mana)
+{
+	assert(current_mana <= max_mana);
+	this->current_mana = current_mana;
+}
+
+unsigned int MagicPerson::get_current_mana()
+{
+	return current_mana;
+}
+
+void MagicPerson::set_quantity_sessions(unsigned short& quantity_sessions)
+{
+	assert(quantity_sessions >= 0 && quantity_sessions <= 12);
+	this->quantity_sessions = quantity_sessions;
+	delete[] magic_sessions;
+	magic_sessions = new size_t[quantity_sessions];
+}
+
+unsigned short MagicPerson::get_quantity_sessions()
+{
+	return quantity_sessions;
+}
+
+MagicPerson& MagicPerson::operator=(const MagicPerson& a) 
+{
+	if (this != &a)
+	{
+		Person::operator=(a);
+
+		max_mana = a.max_mana;
+		current_mana = a.current_mana;
+		quantity_sessions = a.quantity_sessions;
+		if (magic_sessions != a.magic_sessions)
+		{
+			delete[] magic_sessions;
+			magic_sessions = new size_t[quantity_sessions];
+			for (int i = 0; i < quantity_sessions; i++)
+				magic_sessions[i] = a.magic_sessions[i];
+		}
+	}
+	return *this;
+}
+
+MagicPerson::~MagicPerson()
+{
+	delete[] magic_sessions;
+}
+
+ostream& operator<<(ostream& out, const MagicPerson& a)
+{
+	out << Person(a);
+	out << "Max mana: " << a.max_mana << "\nCurrent mana: " << a.current_mana << "\nMonth in session: " << a.quantity_sessions << "\n";
+	return out;
+}

@@ -1,0 +1,29 @@
+#include <iostream>
+#include <vector>
+#include <cassert>
+
+using namespace std;
+
+int main()
+{
+	int N;
+	cin >> N;
+	//assert(N >= 2 && N <= 32727); проверяет на ошибку и если условие не удолетворяет, то оно выдаёт ошибку и строку в которой программа остановила свою работу
+	vector <unsigned short> A(N);
+	for (int i = 0; i < A.size(); i++)
+		cin >> A[i];
+	unsigned short min = A[0], max = A[0];
+	for (int i = 1; i < A.size(); i++)
+	{
+		if (A[i] > max)
+		{
+			max = A[i];
+		}
+		if (A[i] < min)
+		{
+			min = A[i];
+		}
+	}
+	cout << max - min;
+	return 0;
+}

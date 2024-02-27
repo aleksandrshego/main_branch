@@ -1,0 +1,46 @@
+#pragma once
+#include "List.h"
+
+struct Element_double
+{
+	double data;
+	Element_double* next; // адрес следующего элемента
+	Element_double* prev; // адрес предыдущего элемента
+};
+
+class List_double : public List
+{
+
+private:
+	Element_double* begin;
+	Element_double* end;
+	int count;
+
+	Element_double* Move(int index);
+	void CorrectIndex(int index);
+	void Copy(const List_double& obj);
+
+public:
+	List_double();
+	List_double(const List_double& obj);
+	List_double& operator=(const List_double& obj);
+
+	int GetCount() override;
+
+	void AddBegin(void* data) override;
+	void AddEnd(void* data) override;
+
+	void Print() override;
+
+	void SetElement(void* data, int index) override;
+	void* GetElement(int index) override;
+
+	void Insert(void* data, int index) override;
+	void Delete(int index) override;
+	void Clear() override;
+
+	void Reverse() override;
+
+	~List_double();
+};
+

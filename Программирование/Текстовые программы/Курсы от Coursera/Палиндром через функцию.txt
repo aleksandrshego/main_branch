@@ -1,0 +1,24 @@
+#include <iostream>
+#include <string>
+#include <algorithm>
+
+using namespace std;
+
+bool IsPalindrom(string x)
+{
+	string prov;
+	prov = x;
+	reverse(prov.begin(), prov.end());
+	if (prov == x)
+		return true;
+	else
+		return false;
+}
+
+int main()
+{
+	string pali;
+	cin >> pali;
+	cout << IsPalindrom(pali);
+	return 0;
+}

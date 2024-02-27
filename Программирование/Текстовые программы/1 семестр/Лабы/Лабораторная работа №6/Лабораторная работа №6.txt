@@ -1,0 +1,140 @@
+/*
+1.Найти все простые числа <=N. Использовать алгоритм «Решето
+Эратосфена» и контейнер set.
+5 баллов
+2. Вывести список всех слов, хранящихся в текстовом файле(set).
+Подсчитать количество вхождений каждого слова в текстовом файле.
+Использовать класс map<string,int>. Прописные и строчные буквы:
+a) различать – 5 баллов
+b) не различать - 7 баллов
+(Делать или на 5 или на 7, т.е. один из вариантов)
+*/
+#include <iostream>
+#include <vector>
+#include <conio.h>
+#include <set>
+#include <string>
+#include <cctype>
+#include <fstream>
+#include <map>
+#include <sstream>
+
+using namespace std;
+
+void InputNumber(int& n, set <int>& num)
+{
+	cout << "\nВведите число: ";
+	cin >> n;
+	for (int i = 2; i <= n; i++)
+	{
+		num.insert(i);
+	}
+}
+
+void Sieve(const int& n, set <int>& num)
+{
+	for (int i = 2; i <= n; i++)
+	{
+		for (int index = i * i; index <= n; index += i)
+		{
+			num.erase(index);
+		}
+	}
+}
+
+void Output(const set <int>& num)
+{
+	for (auto& i : num)
+		cout << i << " ";
+	cout << "\n";
+}
+
+void InputOnString(string& s, string& all)
+{
+	all += " " + s;
+}
+
+void WorkingWithSymbols(string& all)
+{
+	for (int i = 0; i < all.length(); i++)
+	{
+		all[i] = (char)tolower(all[i]);
+	}
+}
+
+void InputOnMapAndCounting(const string& all, map <string, int>& w)
+{
+		istringstream str(all);
+		string input;
+	while (str >> input)
+	{
+		cout << input << "\n";
+	}
+}
+
+void OutputMapValues(const map <string, int>& w)
+{
+	for (auto k : w)
+	{
+		cout << k.first << " : " << k.second << "\n";
+	}
+}
+
+int main()
+{
+	setlocale(LC_ALL, "");
+	ifstream fin;
+	cout << "Выберите один из пунктов:\n1. Найти все простые числа <=N.\n2. Вывести список всех слов и их количество в файле.\n";
+	switch (_getch())
+	{
+	case '1':
+	{
+		set <int> numbers;
+		int N;
+		InputNumber(N, numbers);
+		Sieve(N, numbers);
+		cout << "\nВывод простых чисел до числа " << N << ":\n";
+		Output(numbers);
+		cout << "\nЗадание решено алгоритмом \"Решето Эратосфена\".\n";
+		break;
+	}
+	case '2':
+	{
+		fin.open("set.txt");
+
+		if (!fin.is_open())
+		{
+			cout << "Ошибка открытия файла set.txt\n";
+		}
+		else
+		{
+			if (fin.peek() == EOF)
+			{
+				cout << "\nФайл пустой. Заполните его словами.\n";
+
+				fin.close();
+
+				return 0;
+			}
+			map <string, int> word;
+			string all_str, analysis;
+			while (getline(fin, analysis))
+			{
+				InputOnMapAndCounting(analysis, word);
+				//InputOnString(analysis, all_str); 
+			}
+			WorkingWithSymbols(all_str);
+			InputOnMapAndCounting(all_str, word);
+			
+			cout << "\nСлова и их частота встречаемости:\n";
+			OutputMapValues(word);
+			fin.close();
+			break;
+		}
+	}
+	default:
+		cout << "\nВыбран ошибочный пункт.";
+	}
+	
+	return 0;
+}

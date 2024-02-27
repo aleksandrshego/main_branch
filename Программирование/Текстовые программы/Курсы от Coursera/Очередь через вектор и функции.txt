@@ -1,0 +1,65 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+void PrintWorry(const vector<bool>& x) // Константное значение для того, чтобы ничего не изменить что-нибудь случайно                                       
+{                                      // (или как говорят программисты "защитить от изменений").
+	int wor_people = 0;                    // Ссылка для того, чтобы не делать копию.
+	for (auto i : x)                 
+		if (i == 1)
+			wor_people++;
+	cout << wor_people << endl;
+}
+
+void Worry(const int& k, vector<bool>& x)
+{
+	x[k] = true;
+}
+
+void Quiet(const int& k, vector<bool>& x)
+{
+	x[k] = false;
+}
+
+void Come(const int& n, vector<bool>& x)
+{
+	int size;
+	size = x.size();
+	x.resize(size + (n));
+}
+
+int main()
+{
+	int Q;
+	cin >> Q;
+	vector<bool> queue;
+	for (int i = 0; i <= Q; i++)
+	{
+		string operation;
+		int number_q;
+		cin >> operation;
+		if (operation == "WORRY_COUNT")
+		{
+			PrintWorry(queue);
+		}
+		else
+		{
+			cin >> number_q;
+			if (operation == "WORRY")
+			{
+				Worry(number_q, queue);
+			}
+			if (operation == "QUIET")
+			{
+				Quiet(number_q, queue);
+			}
+			if (operation == "COME")
+			{
+				Come(number_q, queue);
+			}
+		}
+	}
+	return 0;
+}

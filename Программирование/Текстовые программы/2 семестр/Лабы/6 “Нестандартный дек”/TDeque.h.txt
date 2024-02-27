@@ -1,0 +1,308 @@
+#ifndef TDEQUE_H
+#define TDEQUE_H
+
+#include <iostream>
+
+using namespace std;
+
+template <class TInfo>
+struct TDequeItem // элемент дека
+{
+	TInfo data; // данные
+	TDequeItem<TInfo>* next; // указатель на следующий элемент
+	TDequeItem<TInfo>* prev; // указатель на предыдущий элемент
+};
+
+template <class TInfo>
+class TDeque /* дек – двустороння очередь */
+{
+protected:
+	/* указатели на первый и последний элементы в сп	иске */
+	TDequeItem<TInfo>* begin, * end;
+	int size; // количество элементов в деке
+	void Erase(); // удаление всех элементов
+	void Clone(const TDeque& obj); // копирование объекта
+	void DeleteItem(TDequeItem<TInfo>* ptr); // удаление элемента по указателю
+	TDequeItem<TInfo>* PtrByIndex(unsigned index) const; // указатель на элемент с заданным индексом
+	bool CorrectIndex(unsigned index) const; // корректность указателя
+
+public:
+	TDeque(); // конструктор
+	TDeque(const TDeque& obj); // конструктор копирования
+	virtual ~TDeque(); // деструктор
+	void InsFront(TInfo data); // включить элемент в голову дека
+	void InsRear(TInfo data); // включить элемент в хвост дека
+	void DelFront(); // исключить элемент из головы дека
+	void DelRear(); // исключить элемент из хвоста дека
+	const TDeque<TInfo>& operator = (const TDeque<TInfo>& obj);// оператор присваивания
+	const TInfo& GetByIndex(unsigned index) const; // получить элемент по индексу
+	void SetByIndex(TInfo data, unsigned index); // изменить элемент по индексу
+	void Browse(void WorkItem(TInfo&)); // просмотр с изменением элементов
+	void Browse(void WorkItem(TInfo)) const; // просмотр без изменения элементов, что-то типа print
+	//void Print() const; // вывод дека
+};
+
+template<class TInfo>
+inline TDeque<TInfo>::TDeque()
+{
+	begin = end = nullptr;
+	size = 0;
+}
+
+template<class TInfo>
+inline TDeque<TInfo>::TDeque(const TDeque& obj)
+{
+	Clone(obj);
+}
+
+template<class TInfo>
+inline TDeque<TInfo>::~TDeque()
+{
+	Erase();
+}
+
+template<class TInfo>
+inline void TDeque<TInfo>::InsFront(TInfo data)
+{
+	try
+	{
+		TDequeItem<TInfo>* t = new TDequeItem<TInfo>;
+		t->data = data;
+		t->prev = nullptr;
+		t->next = begin;
+
+		if (size == 0)
+			begin = end = t;
+		else
+		{
+			begin->prev = t;
+			begin = t;
+		}
+		size++;
+	}
+	catch (bad_alloc ba)
+	{
+		cout << ba.what() << "\n";
+	}
+}
+
+template<class TInfo>
+inline void TDeque<TInfo>::InsRear(TInfo data)
+{
+	try
+	{
+		TDequeItem<TInfo>* t = new TDequeItem<TInfo>;
+		t->data = data;
+		t->next = nullptr;
+		t->prev = end;
+
+		if (size == 0)
+			begin = end = t;
+		else
+		{
+			end->next = t;
+			end = t;
+		}
+		size++;
+	}
+	catch (bad_alloc ba)
+	{
+		cout << ba.what() << "\n";
+	}
+}
+
+template<class TInfo>
+inline void TDeque<TInfo>::DelFront()
+{
+	if (size == 0)
+	{
+		cout << "The deque is empty.\n";
+		return;
+	}
+	DeleteItem(PtrByIndex(0));
+	cout << "The first element has been removed\n";
+}
+
+template<class TInfo>
+inline void TDeque<TInfo>::DelRear() // мне только одно интересно. Какого хрена? Что это мы в метод передаём?
+{
+	if (size == 0)
+	{
+		cout << "The deque is empty.\n";
+		return;
+	}
+	DeleteItem(PtrByIndex(size - 1));
+	cout << "The last element has been removed\n";
+}
+
+template<class TInfo>
+inline const TDeque<TInfo>& TDeque<TInfo>::operator=(const TDeque<TInfo>& obj)
+{
+	if (this != &obj)
+	{
+		Clone(obj);
+	}
+	return *this;
+}
+
+template<class TInfo>
+inline const TInfo& TDeque<TInfo>::GetByIndex(unsigned index) const
+{
+	try
+	{
+		if (!CorrectIndex(index))
+		{
+			throw exception("The index is larger than the dimension.");
+		}
+
+		TDequeItem<TInfo>* t = begin;
+		for (int i = 0; i < index; ++i)
+			t = t->next;
+		return t->data;
+	}
+	catch (exception& ex)
+	{
+		cout << ex.what() << "\n";
+	}
+}
+
+template<class TInfo>
+inline void TDeque<TInfo>::SetByIndex(TInfo data, unsigned index)
+{
+	if (!CorrectIndex(index))
+	{
+		cout << "The index is larger than the dimension.\n";
+		return;
+	}
+
+	TDequeItem<TInfo>* t = begin;
+	for (int i = 0; i < index; ++i) // можно сделать отдельную фунцию move
+		t = t->next;
+	t->data = data;
+}
+
+template<class TInfo>
+inline void TDeque<TInfo>::Browse(void WorkItem(TInfo&))
+{
+	if (size == 0)
+		cout << "Deque is empty.\n";
+	else 
+	{
+		TDequeItem<TInfo>* t = begin;
+		for (int i = 0; i < size; ++i)
+		{
+			WorkItem(t->data);
+			cout << t->data << " ";
+			t = t->next;
+		}
+		cout << "\n";
+	}
+}
+
+template<class TInfo>
+inline void TDeque<TInfo>::Browse(void WorkItem(TInfo)) const
+{
+	if (size == 0)
+		cout << "Deque is empty.\n";
+	else
+	{
+		TDequeItem<TInfo>* t = begin;
+		for (int i = 0; i < size; ++i)
+		{
+			WorkItem(t->data);
+			cout << t->data << " ";
+			t = t->next;
+		}
+		cout << "\n";
+	}
+}
+
+//template<class TInfo>
+//inline void TDeque<TInfo>::Print() const
+//{
+//	if (size == 0)
+//		cout << "Deque is empty.\n";
+//	else
+//	{
+//		TDequeItem<TInfo>* t = begin;
+//		while (t != nullptr)
+//		{
+//			cout << t->data << " ";
+//			t = t->next;
+//		}
+//		cout << "\n";
+//	}
+//}
+
+template<class TInfo>
+inline void TDeque<TInfo>::Erase() // удаление всех элементов
+{
+	int n = size;
+	for (int i = 0; i < n; ++i)
+		DeleteItem(PtrByIndex(0));
+}
+
+template<class TInfo>
+inline void TDeque<TInfo>::Clone(const TDeque& obj)
+{
+	Erase();
+
+	TDequeItem<TInfo>* t = obj.begin;
+	while (t != nullptr)
+	{
+		InsRear(t->data);
+		t = t->next;
+	}
+}
+
+template<class TInfo>
+inline void TDeque<TInfo>::DeleteItem(TDequeItem<TInfo>* ptr)
+{
+	TDequeItem<TInfo>* ptr_next = ptr->next;
+	TDequeItem<TInfo>* ptr_prev = ptr->prev;
+
+	if ((size > 1) && (ptr_prev != nullptr))
+		ptr_prev->next = ptr_next;
+	if ((size > 1) && (ptr_next != nullptr))
+		ptr_next->prev = ptr_prev;
+	if (begin == ptr)
+		begin = ptr_next;
+	if (end == ptr)
+		end = ptr_prev;
+
+	delete ptr;
+	size--;
+}
+
+template<class TInfo>
+inline TDequeItem<TInfo>* TDeque<TInfo>::PtrByIndex(unsigned index) const
+{
+	try
+	{
+		if (!CorrectIndex(index))
+		{
+			throw exception("The index is larger than the dimension.");
+		}
+
+		TDequeItem<TInfo>* t = begin;
+
+		for (int i = 0; i < index; ++i)
+		{
+			t = t->next;
+		}
+		return t;
+	}
+	catch (exception& ex)
+	{
+		cout << ex.what() << "\n";
+	}
+}
+
+template<class TInfo>
+inline bool TDeque<TInfo>::CorrectIndex(unsigned index) const
+{
+	return index < size && index >= 0;
+}
+
+//#include "TDeque.inl"
+#endif

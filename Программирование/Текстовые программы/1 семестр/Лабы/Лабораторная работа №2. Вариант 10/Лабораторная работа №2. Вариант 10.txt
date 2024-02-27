@@ -1,0 +1,64 @@
+#include <iostream>
+#include <cmath>
+#include <windows.h>
+using namespace std;
+int main()
+{
+	unsigned long long k = 0, sumN = 0, remN, quit = 1;
+	int numb;
+	setlocale(LC_ALL, "rus");
+	cout << "Лабораторная работа №2.";
+	Sleep(500);
+	cout << "\nРаботу выполнил Шего Александр.";
+	Sleep(1000);
+	system("cls");
+	while (quit != 0)
+	{
+		cout << "Введите число - ";
+		cin >> numb;
+		if (numb <= 0)
+		{
+			cout << "\nЧисло введено неверно.\n";
+			return 0;
+		}
+		else
+		{
+			cout << "\nЧисла Армстронга:\n";
+			for (unsigned long long n = 1; n <= numb; n++)
+			{
+				remN = n;
+				while (n != 0)
+				{
+					n /= 10;
+					k++;
+				}
+				n = remN;
+				while (n != 0)
+				{
+					sumN += pow(n % 10, k);
+					n /= 10;
+				}
+				n = remN;
+				if (sumN == n)
+				{
+					Sleep(500);
+					cout << n << "\n";
+				}
+				sumN = 0;
+				k = 0;
+
+			}
+		}
+		Sleep(500);
+		cout << "\nЕсли вы хотите завершить программу, тогда введите '0', если хотите продолжить - '1'.";
+		cout << "\nВаш выбор - ";
+		cin >> quit;
+		while (quit != 1 && quit != 0)
+		{
+			cout << "\nВы не выбрали нужного значения. \nПопробуйте ещё раз! \nВаш выбор - ";
+			cin >> quit;
+		}
+		cout << "\n";
+	}
+	return 0;
+}

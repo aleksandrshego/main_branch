@@ -1,0 +1,25 @@
+#include <iostream>
+#include <vector>
+#include <string>
+
+using namespace std;
+
+void MoveStrings(vector<string>& x, vector<string>& y)
+{
+	for (auto i : x)
+	{
+		y.push_back(i);
+	}
+	x.clear();
+}
+
+int main()
+{
+	setlocale(LC_ALL, "rus");
+	vector<string> source = { "a", "b", "c" };
+	vector<string> destination = { "z" };
+	MoveStrings(source, destination);
+	if (source.empty())
+		cout << "Пустой.";
+	return 0;
+}

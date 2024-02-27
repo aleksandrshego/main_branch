@@ -1,0 +1,22 @@
+#include <iostream>
+
+using namespace std;
+
+int main()
+{
+	float N, A, B, X, Y;
+	cin >> N >> A >> B >> X >> Y;
+	if (N > A && N <= B)
+	{
+		X /= 100;
+		N = N - (N * X);
+
+	}
+	else if (N > B)
+	{
+		Y /= 100;
+		N = N - (N * Y);
+	}
+	cout << N;
+	return 0;
+}

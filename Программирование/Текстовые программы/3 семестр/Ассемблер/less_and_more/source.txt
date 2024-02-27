@@ -1,0 +1,60 @@
+#include <iostream>
+
+using namespace std;
+
+void input(int* a, const int& size)
+{
+	cout << "Введите 10 чисел: ";
+	for (int i = 0; i < size; ++i)
+		cin >> a[i];
+}
+
+int main()
+{
+	setlocale(0, "rus");
+
+	const int n = 10;
+	int a[n], max, min;
+
+	input(a, n);
+
+	__asm {
+		xor eax, eax
+		xor ebx, ebx
+		xor ecx, ecx
+		xor edx, edx
+		xor esi, esi
+
+		mov ecx, -1
+		mov esi, a // max
+		mov ebx, a // min
+
+		start :
+		inc ecx
+
+			cmp ecx, 10
+			je fin
+
+			cmp[a + 4 * ecx], esi
+			ja formax
+
+			cmp[a + 4 * ecx], ebx
+			jb formin
+
+			jmp start
+			formax :
+		mov esi, [a + 4 * ecx]
+			jmp start
+			formin :
+		mov ebx, [a + 4 * ecx]
+			jmp start
+			fin :
+		mov max, esi
+			mov min, ebx
+
+	}
+
+	cout << "max = " << max << " min = " << min;
+
+	return 0;
+}

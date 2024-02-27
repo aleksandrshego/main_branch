@@ -1,0 +1,98 @@
+/*
+        КОЛЛОКВИУМ
+    Задание заключалось в том, что у нас есть сторока из слов. 
+    Программе необходимо поменять местами последний символ первого слова и первый символ последнего слова в строке.
+    Подстроки (слова) разделены пробелами.
+    Вывод в файле out.txt.
+*/
+
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <vector>
+#include <string>
+
+using namespace std;
+
+void Input(const string& all, vector <string>& w)
+{
+    istringstream str(all);
+    string input;
+    while (str >> input)
+    {
+        w.push_back(input);
+    }
+}
+
+bool Prov(const string& s)
+{
+    if (s.length() > 500)
+    {
+        cout << "\nОшибка. Строка по размеру больше, чем 500!\n";
+        return true;
+    }
+    else
+        return false;
+}
+
+void ExchangeChar(vector <string>& w)
+{
+    char temp = w[0][w[0].size() - 1];
+    w[0][w[0].size() - 1] = w[w.size() - 1][0];
+    w[w.size() - 1][0] = temp;
+}
+
+int main()
+{
+    setlocale(LC_ALL, "rus");
+    ifstream fin;
+    ofstream fout;
+
+    fin.open("in.txt");
+    fout.open("out.txt");
+
+    if (!fin.is_open())
+    {
+        cout << "Ошибка открытия файла in.txt\n";
+    }
+    else
+    {
+        if (fin.peek() == EOF)
+        {
+            cout << "\nОшибка. Файл пустой.\n";
+
+            fout.close();
+            fin.close();
+
+            return 0;
+        }
+        string in_text_str;
+        vector <string> all_words_in_str;
+        unsigned int index_vector = 0;
+        while (getline(fin, in_text_str))
+        {
+            if (Prov(in_text_str))
+            {
+                return 0;
+            }
+            Input(in_text_str, all_words_in_str);
+            ExchangeChar(all_words_in_str);
+            unsigned int k = 0;
+            for (auto i : all_words_in_str)
+            {
+                if (k == 0)
+                {
+                    fout << i;
+                }
+                else
+                    fout << " " << i;
+                k++;
+            }
+            all_words_in_str.clear();
+            fout << "\n";
+        }
+        fin.close();
+        fout.close();
+    }
+    return 0;
+}

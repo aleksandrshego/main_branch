@@ -1,0 +1,185 @@
+#include <iostream>
+#include <conio.h>
+#include <Windows.h>
+#include <iomanip>
+#include <cmath>
+
+using namespace std;
+
+double InputEps()
+{
+	double e;
+	cout << "Input eps: ";
+	cin >> e;
+	if (e <= 0 || e > 1)
+	{
+		cout << "Error. Please, try again.\n";
+		InputEps();
+	}
+	return e;
+}
+
+double FirstFunction(double x)
+{
+	return 1 / (1 + x * x * x);
+}
+
+double SecondFunction(double x)
+{
+	return x * log(x);
+}
+
+double ThirdFunction(double x)
+{
+	return log(x) / x;
+}
+
+void LeftRectangles(double (*f)(double), double a, double b, double eps) // пока что без исключений и всего остального, к примеру, если интеграл отрицательный или b > a и т.д.
+{
+	unsigned int n = 4;
+	long double h = (b - a) / n, sum1 = 0, sum2 = 0;
+
+	for (int step = 0; step < n; step++)
+	{
+		sum2 += h * f(a + h * step);
+	}
+
+	while (fabs(sum1 - sum2) > eps)
+	{
+		sum1 = sum2;
+		sum2 = 0;
+		n *= 2; h /= 2;
+		for (int step = 0; step < n; step++)
+		{
+			sum2 += h * f(a + h * step);
+		}
+	}
+	
+	cout << "\tIntegration by the left rectangle method: " << sum2 << "\n\t\tNumber of partitions: " << n << "\n";
+}
+
+void RightRectangles(double (*f)(double), double a, double b, double eps)
+{
+	unsigned int n = 4;
+	long double h = (b - a) / n, sum1 = 0, sum2 = 0;
+
+	for (int step = 1; step <= n; step++)
+	{
+		sum2 += h * f(a + h * step);
+	}
+
+	while (fabs(sum1 - sum2) > eps)
+	{
+		sum1 = sum2;
+		sum2 = 0;
+		n *= 2; h /= 2;
+		for (int step = 1; step <= n; step++)
+		{
+			sum2 += h * f(a + h * step);
+		}
+	}
+
+	cout << "\tIntegration by the right rectangle method: " << sum2 << "\n\t\tNumber of partitions: " << n << "\n";
+}
+
+void MediumRectangles(double (*f)(double), double a, double b, double eps)
+{
+	unsigned int n = 4;
+	long double h = (b - a) / n, sum1 = 0, sum2 = 0;
+
+	for (int step = 0; step < n; step++)
+	{
+		sum2 += h * f((a + h * step) + h / 2);
+	}
+
+	while (fabs(sum1 - sum2) > eps)
+	{
+		sum1 = sum2;
+		sum2 = 0;
+		n *= 2; h /= 2;
+		for (int step = 0; step < n; step++)
+		{
+			sum2 += h * f((a + h * step) + h / 2);
+		}
+	}
+
+	cout << "\tIntegration by the medium rectangle method: " << sum2 << "\n\t\tNumber of partitions: " << n << "\n";
+}
+
+void Trapezoids(double (*f)(double), double a, double b, double eps)
+{
+	unsigned int n = 4;
+	long double h = (b - a) / n, sum1 = 0, sum2 = h * ((f(a) + f(b)) / 2);
+
+	for (int step = 1; step < n; step++)
+	{
+		sum2 += h * f(a + h * step);
+	}
+
+	while (fabs(sum1 - sum2) > eps)
+	{
+		sum1 = sum2;
+		n *= 2; h /= 2;
+		sum2 = h * ((f(a) + f(b)) / 2);
+		for (int step = 1; step < n; step++)
+		{
+			sum2 += h * f(a + h * step);
+		}
+	}
+
+	cout << "\tIntegration by the trapezoids method: " << sum2 << "\n\t\tNumber of partitions: " << n << "\n";
+}
+
+void ParabolicTrapezoids(double (*f)(double), double a, double b, double eps)
+{
+	unsigned int n = 4;
+	long double h = (b - a) / n, sum1 = 0, sum2 = h / 3 * (f(a) + f(b));
+
+	for (int step = 1; step < n; step++)
+	{
+		if (step % 2 == 0)
+			sum2 += (2 * h) / 3 * f(a + h * step);
+		else
+			sum2 += (4 * h) / 3 * f(a + h * step);
+	}
+
+	while (fabs(sum1 - sum2) > eps)
+	{
+		sum1 = sum2;
+		n *= 2; h /= 2;
+		sum2 = h / 3 * (f(a) + f(b));
+		for (int step = 1; step < n; step++)
+		{
+			if (step % 2 == 0)
+				sum2 += (2 * h) / 3 * f(a + h * step);
+			else
+				sum2 += (4 * h) / 3 * f(a + h * step);
+		}
+	}
+
+	cout << "\tIntegration by the parabolic trapezoids (Simpson 's formula) method: " << sum2 << "\n\t\tNumber of partitions: " << n << "\n";
+}
+
+void AllMetods(double (*f)(double), const double& a, const double& b, const double& eps)
+{
+	LeftRectangles((*f), a, b, eps);
+	RightRectangles((*f), a, b, eps);
+	MediumRectangles((*f), a, b, eps);
+	Trapezoids((*f), a, b, eps);
+	ParabolicTrapezoids((*f), a, b, eps);
+}
+
+// parabolic trapezoids(Simpson 's formula)
+int main()
+{
+	cout << setprecision(8) << fixed; // установка плавающей запятой
+	double e = InputEps();
+
+	cout << "\nFirst function:\n";
+	AllMetods(FirstFunction, 0, 1, e);
+	cout << "\nSecond function:\n";
+	AllMetods(SecondFunction, 1, 2, e);
+	cout << "\nThird function:\n";
+	AllMetods(ThirdFunction, 1, 2, e);
+	return 0;
+}

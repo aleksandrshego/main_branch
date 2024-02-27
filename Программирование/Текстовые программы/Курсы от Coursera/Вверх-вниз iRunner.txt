@@ -1,0 +1,54 @@
+#include <iostream>
+
+using namespace std;
+
+int main()
+{
+	ios_base::sync_with_stdio(0); cin.tie(0);
+	int v1, v2, H, sp = 0;
+	long double l_general = 0.00;
+	cin >> H >> v1 >> v2;
+	if (v1 >= H)
+	{
+		cout << 0;
+		return 0;
+	}
+	else if ((0.25 * v2) >= v1)
+	{
+		cout << -1;
+		return 0;
+	}
+	// 1 час подъёма, 15 минут отдыха = 0,25 часа;
+	else if (v2 == 0)
+	{
+		if (H % v1 == 0)
+			cout << (H / v1) - 1;
+		else
+			cout << floor((double)H / v1);
+	}
+	else
+	{
+	    if (H >= 1000000000 * (v1 - 0.25 * v2))
+		{
+			sp = 1000000000;
+			H -= 1000000000 * (v1 - 0.25 * v2);
+		}
+		else if (H >= 100000000 * (v1 - 0.25 * v2))
+		{
+			sp = 100000000;
+			H -= 100000000 * (v1 - 0.25 * v2);
+		}
+			while (l_general < H)
+			{
+				l_general += v1;
+				if (l_general >= H)
+				{
+					cout << sp;
+					break;
+				}
+				sp++;
+				l_general -= (double)v2 * 0.25;
+			}
+	}
+	return 0;
+}

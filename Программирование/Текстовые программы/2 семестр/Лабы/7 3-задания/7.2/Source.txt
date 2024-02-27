@@ -1,0 +1,190 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <fstream>
+#include <Windows.h>
+#include <algorithm>
+
+using namespace std;
+
+#define sys system("pause"); system("cls")
+#define pause system("pause")
+#define cls system("cls")
+
+struct Student
+{
+	string name = "";
+	string surname = "";
+	string patronymic = "";
+	unsigned short int course = 0;
+	unsigned int group = 0;
+
+	friend ostream& operator<< (ostream& out, const Student& data)
+	{
+		out << data.surname << " " << data.name << "." << data.patronymic << " " << data.course << " " << data.group;
+		return out;
+	}
+};
+
+void print(const vector<Student>& st)
+{
+	for (int i = 0; i < st.size(); ++i)
+		cout << st[i] << "\n";
+}
+
+string lower_string(const string& st)
+{
+	string temp(st);
+	for (int i = 0; i < temp.size(); ++i)
+		temp[i] = tolower(temp[i]);
+	return temp;
+}
+
+void prov(ifstream& fin)
+{
+	if (!fin.is_open())
+		throw exception("Ошибка открытия файла.");
+	if (fin.peek() == EOF)
+		throw exception("Ошибка. Файл пуст.");
+}
+
+void prov(ofstream& fout)
+{
+	if (!fout.is_open())
+		throw exception("Ошибка открытия файла.");
+}
+
+void filling_vector(string& str, vector<Student>& stud)
+{
+	if (!str.empty() && str[0] != ' ')
+	{
+		Student student;
+		str += " ";
+		student.surname = str.substr(0, str.find_first_of(" ."));
+		str.erase(0, str.find_first_of(" .") + 1);
+		student.name = str.substr(0, str.find_first_of(" ."));
+		str.erase(0, str.find_first_of(" .") + 1);
+		student.patronymic = str.substr(0, str.find_first_of(" ."));
+		str.erase(0, str.find_first_of(" .") + 1);
+		student.course = stoi(str.substr(0, str.find_first_of(" .")));
+		str.erase(0, str.find_first_of(" .") + 1);
+		student.group = stoi(str.substr(0, str.find_first_of(" .")));
+		str.erase(0, str.find_first_of(" .") + 1);
+		stud.push_back(student);
+	}
+}
+
+void reading_file(vector<Student>& st)
+{
+	try
+	{
+		ifstream fin("Student.txt");
+		prov(fin);
+
+		string str;
+		while (getline(fin, str))
+			filling_vector(str, st);
+
+		fin.close();
+	}
+	catch (exception& ex)
+	{
+		cout << ex.what() << "\n";
+	}
+}
+
+void writing_file_fio(const vector<Student>& st)
+{
+	try
+	{
+		ofstream fout("Fio.txt");
+		prov(fout);
+
+		vector<Student> fio(st);
+
+		sort(fio.begin(), fio.end(),
+			[](const Student& a, const Student& b)
+			{
+				if (lower_string(a.surname) == lower_string(b.surname))
+				{
+					if (lower_string(a.name )== lower_string(b.name))
+					{
+						if (lower_string(a.patronymic) == lower_string(b.patronymic))
+						{
+							if (a.course == b.course)
+								return a.group < b.group;
+							return a.course < b.course;
+						}
+						return lower_string(a.patronymic) < lower_string(b.patronymic);
+					}
+					return lower_string(a.name) < lower_string(b.name);
+				}
+				return lower_string(a.surname) < lower_string(b.surname);
+			});
+
+		for (int i = 0; i < fio.size(); ++i)
+			fout << fio[i] << "\n";
+
+		fout.close();
+	}
+	catch (exception& ex)
+	{
+		cout << ex.what() << "\n";
+	}
+}
+
+void writing_groups(const vector<Student>& st)
+{
+	try
+	{
+		ofstream fout("Groups.txt");
+		prov(fout);
+
+		vector<Student> groups(st);
+
+		sort(groups.begin(), groups.end(),
+			[](const Student& a, const Student& b)
+			{
+				if (a.course == b.course)
+				{
+					if (a.group == b.group)
+					{
+						if (a.surname == b.surname)
+						{
+							if (a.name == b.name)
+								return a.patronymic < b.patronymic;
+							return a.name < b.name;
+						}
+						return a.surname < b.surname;
+					}
+					return a.group < b.group;
+				}
+				return a.course < b.course;
+			});
+
+		for (int i = 0; i < groups.size(); ++i)
+			fout << groups[i] << "\n";
+
+		fout.close();
+	}
+	catch (exception& ex)
+	{
+		cout << ex.what() << "\n";
+	}
+}
+
+
+int main()
+{
+	setlocale(0, "rus");
+	SetConsoleCP(1251);
+	SetConsoleOutputCP(1251);
+
+	vector<Student> students;
+	reading_file(students);
+	print(students);
+	writing_file_fio(students);
+	writing_groups(students);
+
+	return 0;
+}

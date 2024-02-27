@@ -1,0 +1,136 @@
+#include "Person.h"
+
+short Person::count = 1;
+
+bool set_movement(condition& cond)
+{
+	return !(cond == condition::Paralyzed || cond == condition::Dead);
+}
+
+Person::Person() : id(count++), race_p(race::Human)
+{
+	name = "HuggyWaggy";
+	condit_p = condition::Paralyzed;
+	movement = set_movement(condit_p);
+}
+
+Person::Person(const string name, const condition cond, const race r) : id(count++), race_p(r)
+{
+	this->name = name;
+	this->condit_p = cond;
+	this->movement = set_movement(condit_p);
+}
+
+Person::Person(const Person& pers) : id(count++), race_p(pers.race_p)
+{
+	this->name = pers.name;
+	this->condit_p = pers.condit_p;
+	this->movement = set_movement(condit_p);
+}
+
+void Person::set_condition(condition cond)
+{
+	condit_p = cond;
+	movement = set_movement(condit_p);
+}
+
+string Person::get_condition() const
+{
+	switch (condit_p)
+	{
+	case condition::Normal:
+	{
+		return "Normal";
+		break;
+	}
+	case condition::Paralyzed:
+	{
+		return "Paralyzed";
+		break;
+	}
+	case condition::Dead:
+	{
+		return "Dead";
+		break;
+	}
+	default:
+		return "Unknown condition";
+		break;
+	}
+}
+
+string Person::get_race() const
+{
+	switch (race_p)
+	{
+	case race::Human:
+	{
+		return "Human";
+		break;
+	}
+	case race::Dwarf:
+	{
+		return "Dwarf";
+		break;
+	}
+	case race::Elf:
+	{
+		return "Elf";
+		break;
+	}
+	default:
+		return "Unknown race";
+		break;
+	}
+}
+
+void Person::set_name(const string& n)
+{
+	name = n;
+}
+
+string Person::get_name() const
+{
+	return name;
+}
+
+string Person::get_movement() const
+{
+	return movement ? "The character can move" : "The character can't move";
+}
+
+short Person::get_id() const
+{
+	return id;
+}
+
+Person::~Person()
+{
+}
+
+Person& Person::operator=(const Person& dual_pers)
+{
+	if (this != &dual_pers);
+	{
+		this->condit_p = dual_pers.condit_p;
+		const_cast<race&> (race_p) = dual_pers.race_p;
+		this->movement = dual_pers.movement;
+		this->name = dual_pers.name;
+	}
+	return *this;
+}
+
+bool Person::operator==(const Person& other)
+{
+	return this->name == other.name && this->condit_p == other.condit_p &&
+	this->race_p == other.race_p;
+}
+
+ostream& operator<<(ostream& out, const Person& pers)
+{
+	out << "Name: " << pers.get_name() << "\nID: " << pers.get_id() << "\n";
+	out << "Race: " << pers.get_race() << "\nCondition: " << pers.get_condition() << "\n";
+	out << pers.get_movement() << "\n";
+
+	return out;
+}

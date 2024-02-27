@@ -1,0 +1,103 @@
+/*
+        В текстовом файле записаны строки длиной не более 255 символов, слова в
+        которых разделены хотя бы одним пробелом или знаками препинания. В каждой
+        строке найти слова, являющиеся простыми числами и поменять местами
+        максимальное и минимальное. Если максимальных и/или минимальных чисел
+        несколько, то брать последнее. Результаты записать в новый текстовый файл,
+        сохраняя все разделители.
+*/
+
+
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <sstream>
+
+using namespace std;
+
+void StringAnalysis(const string& str, ofstream& fout)
+{
+    istringstream s(str);
+    string input;
+    while (s >> input)
+    {
+        int prov = 0;
+        for (int i = 0; i < input.size(); i++)
+        {
+            if (input[i] < '0' || input[i] > '9')
+            {
+                prov = 1;
+                break;
+            }
+        }
+        if (prov != 1)
+        {
+            int max = (int)input[0] - 48, min = (int)input[0] - 48, imax = 0, imin = 0;
+            char temp;
+            for (int i = 1; i < input.size(); i++)
+            {
+                {
+                    if ((int)input[i] - 48 >= max)
+                    {
+                        max = (int)input[i] - 48;
+                        imax = i;
+                    }
+                    if ((int)input[i] - 48 <= min)
+                    {
+                        min = (int)input[i] - 48;
+                        imin = i;
+                    }
+                }
+            }
+            temp = input[imax];
+            input[imax] = input[imin];
+            input[imin] = temp;
+        }
+        fout << input << " ";
+    }
+}
+
+int main()
+{
+	setlocale(LC_ALL, "rus");
+	ifstream fin;
+	ofstream fout;
+
+	fin.open("IN.txt");
+	fout.open("OUT.txt");
+
+	if (!fin.is_open())
+	{
+		cout << "Ошибка открытия файла IN.txt\n";
+	}
+    else
+    {
+        if (fin.peek() == EOF)
+        {
+            cout << "\nОшибка. Файл пустой.\n";
+
+            fout.close();
+            fin.close();
+
+            return 0;
+        }
+        string s;
+        int step = 0;
+        while (getline(fin,s))
+        {
+            if (s.empty())
+                continue;
+            if (step != 0)
+                fout << "\n\n";
+            fout << "Исходная строка (до изменений):\n" << s << "\n";
+            fout << "Строка после изменения:\n";
+            StringAnalysis(s, fout);
+            step++;
+        }
+    }
+
+    fout.close();
+    fin.close();
+
+	return 0;
+}

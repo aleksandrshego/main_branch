@@ -1,0 +1,287 @@
+#include <iostream>
+#include <vector>
+#include <conio.h>
+#include <windows.h>
+#include <algorithm>
+#include <numeric>
+
+using namespace std;
+
+void InputNumbers(vector <int>& num)
+{
+	int number;
+	cout << "Введите элементы, при окончании ввода ввести любой символ, кроме цифр:\n";
+	while (cin >> number)
+	{
+		//if (cin.fail()) // если предыдущее извлечение оказалось неудачным,
+		//{
+		//	cout	<< "\nВвод окончен.\n";
+		//	cin.clear(); // то возвращаем cin в 'обычный' режим работы
+		//	cin.ignore(32767, '\n'); // и удаляем значения предыдущего ввода из входного буфера
+		//	Sleep(1000);
+		//	system("cls");
+		//	break;
+		//}
+		num.push_back(number);
+	}
+	cin.clear();
+	cin.ignore(32767, '\n');
+	/*while (true)
+	{
+		cin >> number;
+		if (number >= '0' && number <= '9')
+		{
+			num.push_back((int)number - 48);
+		}
+		else if (number == 'q')
+			break;
+		else
+			cout << "Введён неправильный символ.\n";
+	}*/
+	if (num.size() == 0)
+	{
+		cout << "Нет введённых элементов вектора.";
+	}
+	else
+	{
+		cout << "Введённые элементы вектора:\n";
+		for (auto i : num)
+		{
+			cout << i << " ";
+		}
+		cout << "\n";
+	}
+}
+
+int SumNumbers(const vector <int>& num)
+{
+	/*int sum = 0;
+	for (auto k : num)
+	{
+		sum += k;
+	}*/
+	int sum = accumulate(num.begin(), num.end(), 0);
+	return sum;
+}
+
+int QuantityNumbers(const vector <int>& num)
+{
+	return num.size();
+}
+
+void OutputSpecialNumberQuantity(const vector <int>& num)
+{
+	int spec_num, q = 0;
+	cout << "\nВведите конретное число, которое нужно посчитать из числа введённых: ";
+	cin >> spec_num;
+	for (auto k : num)
+	{
+		if (k == spec_num)
+			q++;
+	}
+	cout << "\nКоличество числа \"" << spec_num << "\" равно " << q << ".\n";
+}
+
+void OutputSpecialCondition(const vector <int>& num)
+{
+	int n, cycle = 0;
+	cout << "\nВыберите условие для выполнения дальнейшей задачи (нажать на клавишу соответсвующую условию):\n1. Количество элементов больше n-го числа (>n);\n2. Количество элементов больше либо равно n-го числа (>=n);\n3. Количество элементов меньше n-го числа (<n);\n4. Количество элементов меньше либо равно n-го числа (<=n);\n";
+	while (cycle != 1)
+	{
+		switch (_getch())
+		{
+		case '1':
+		{
+			cout << "\nВы выбрали 1-е условие.\nВведите n: ";
+			cin >> n;
+			cout << "\nВсе числа удовлетворяющие данному условию:\n";
+			for (auto k : num)
+			{
+				if (k > n)
+					cout << k << " ";
+			}
+			cycle = 1;
+			break;
+		}
+		case '2':
+		{
+			cout << "\nВы выбрали 2-е условие.\nВведите n: ";
+			cin >> n;
+			cout << "\nВсе числа удовлетворяющие данному условию:\n";
+			for (auto k : num)
+			{
+				if (k >= n)
+					cout << k << " ";
+			}
+			cycle = 1;
+			break;
+		}
+		case '3':
+		{
+			cout << "\nВы выбрали 3-е условие.\nВведите n: ";
+			cin >> n;
+			cout << "\nВсе числа удовлетворяющие данному условию:\n";
+			for (auto k : num)
+			{
+				if (k < n)
+					cout << k << " ";
+			}
+			cycle = 1;
+			break;
+		}
+		case '4':
+		{
+			cout << "\nВы выбрали 4-е условие.\nВведите n: ";
+			cin >> n;
+			cout << "\nВсе числа удовлетворяющие данному условию:\n";
+			for (auto k : num)
+			{
+				if (k <= n)
+					cout << k << " ";
+			}
+			cycle = 1;
+			break;
+		}
+		default:
+			cout << "Введён неверный символ. Попробуйте ещё раз.\n";
+		}
+	}
+	cout << "\n";
+}
+
+void ExchangeNull(vector <int>& num)
+{
+	int arif = 0;
+	arif = (SumNumbers(num)) / (QuantityNumbers(num));
+	for (auto& k : num)
+	{
+		if (k == 0)
+		{
+			k = arif;
+		}
+	}
+	cout << "\nМы заменили все нули на среднеарифметическое значение, которое равно " << arif << ".\n";
+	for (auto k : num)
+	{
+		cout << k << " ";
+	}
+	cout << "\n";
+}
+
+void SumWithVector(vector <int>& num)
+{
+	int x, y, sum = 0;
+	cout << "\nВведите две позиции вектора (от какого и до какого будем суммировать):\n";
+	while (true)
+	{
+		cin >> x;
+		if (cin.fail())
+		{
+			cin.clear();
+			cin.ignore(32767, '\n');
+		}
+		else if (x < 0 || x > (num.size() - 1))
+		{
+			cout << "Неверно задана позиция вектора. Попробуйте ещё раз.\n";
+		}
+		else
+			break;
+	}
+	while (true)
+	{
+		cin >> y;
+		if (cin.fail())
+		{
+			cin.clear();
+			cin.ignore(32767, '\n');
+		}
+		else if (y < 0 || y >(num.size() - 1))
+		{
+			cout << "Неверно задана позиция вектора. Попробуйте ещё раз.\n";
+		}
+		else
+			break;
+	}
+	if (x > y)
+	{
+		swap(x, y);
+	}
+	for (x; x <= y; x++)
+	{
+		sum += num[x];
+	}
+	cout << "К каждому элементу вектора мы прибавим " << sum << ".\n\nЭлементы вектора:\n";
+	for (auto& k : num)
+	{
+		k += sum;
+		cout << k << " ";
+	}
+	cout << "\n";
+}
+
+void ExchangeEvenNumbers(vector <int>& num)
+{
+	int max = num[0], min = num[0], sum;
+	for (const auto& i : num)
+	{
+		if (i > max)
+			max = i;
+		if (i < min)
+			min = i;
+	}
+	sum = max - min;
+	cout << "\nРазность максимального и минимального элемента вектора: " << sum << "\n";
+	for (auto& i : num)
+	{
+		if (abs(i) % 2 == 0)
+		{
+			i = sum;
+		}
+	}
+	cout << "\nЭлементы вектора:\n";
+	for (const auto& i : num)
+	{
+		cout << i << " ";
+	}
+	cout << "\n";
+}
+
+void DeleteNumber(vector <int>& num)
+{
+	for (int i = 0; i < num.size(); i++)
+	{
+		for (int j = i + 1; j < num.size(); j++)
+		{
+			if (fabs(num[i]) == fabs(num[j]))
+			{
+				num.erase(num.begin() + j);
+			}
+		}
+	}
+	cout << "\nЭлементы вектора, только уже не повторяющиеся:\n";
+	for (const auto& k : num)
+	{
+		cout << k << " ";
+	}
+	cout << "\n";
+}
+
+int main()
+{
+	setlocale(LC_ALL, "rus");
+	vector <int> numbers;
+	InputNumbers(numbers);
+	if (numbers.size() == 0)
+	{
+		return 0;
+	}
+	cout << "\nСумма чисел равна: " << SumNumbers(numbers) << "\n";
+	cout << "Общее количество чисел: " << QuantityNumbers(numbers) << "\n";
+	OutputSpecialNumberQuantity(numbers);
+	OutputSpecialCondition(numbers);
+	ExchangeNull(numbers);
+	SumWithVector(numbers);
+	ExchangeEvenNumbers(numbers);
+	DeleteNumber(numbers);
+	return 0;
+}

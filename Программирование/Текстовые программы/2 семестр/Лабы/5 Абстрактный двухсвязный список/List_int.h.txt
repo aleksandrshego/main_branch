@@ -1,0 +1,44 @@
+#pragma once
+#include "List.h"
+
+struct Element_int
+{
+	int data;
+	Element_int* next; // адрес следующего элемента
+	Element_int* prev; // адрес предыдущего элемента
+};
+
+class List_int : public List
+{
+private:
+	Element_int* begin;
+	Element_int* end;
+	int count;
+
+	Element_int* Move(int index);
+	void CorrectIndex(int index);
+	void Copy(const List_int& obj);
+
+public:
+	List_int();
+	List_int(const List_int& obj);
+	List_int& operator=(const List_int& obj);
+
+	int GetCount() override;
+
+	void AddBegin(void* data) override;
+	void AddEnd(void* data) override;
+
+	void Print() override;
+
+	void SetElement(void* data, int index) override;
+	void* GetElement(int index) override;
+
+	void Insert(void* data, int index) override;
+	void Delete(int index) override;
+	void Clear() override;
+
+	void Reverse() override;
+
+	~List_int();
+};

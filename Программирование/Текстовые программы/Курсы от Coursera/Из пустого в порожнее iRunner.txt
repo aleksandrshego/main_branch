@@ -1,0 +1,18 @@
+#include <iostream>
+#include <iomanip>
+
+using namespace std;
+
+int main()
+{
+	unsigned long long N;
+	double k = 1;
+	cout << setprecision(9) << fixed;
+	cin >> N;
+	if (N % 2 != 0)
+	{
+		k -= (double)1/(1 + N);
+	}
+	cout << k;
+	return 0;
+}

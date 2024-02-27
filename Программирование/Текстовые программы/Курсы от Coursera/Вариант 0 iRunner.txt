@@ -1,0 +1,57 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+int main()
+{
+	ifstream fin;
+	ofstream fout;
+
+	fin.open("in.txt");
+	fout.open("out.txt");
+
+
+	vector <int> numbers;
+	vector <int> n(10);
+	long long k;
+	while (fin >> k)
+	{
+		numbers.push_back(k);
+	}
+
+	sort(numbers.begin(), numbers.end());
+	auto replay = unique(numbers.begin(), numbers.end());
+	numbers.erase(replay, numbers.end());
+
+	int temp, t;
+
+	int max, max_i;
+
+	for (int i = 0; i < numbers.size(); i++)
+	{
+		
+		temp = numbers[i];
+		while (temp)
+		{
+			t = temp % 10;
+			temp /= 10;
+			n[t]++;
+		}
+		max = n[0], max_i = 0;
+		for (int k = 1; k < n.size(); k++)
+		{
+			if (n[k] >= max)
+			{
+				max = n[k];
+				max_i = k;
+			}
+		}
+		n.assign(10, 0);
+		fout << numbers[i] << ":" << max_i << "\n";
+	}
+
+	return 0;
+}

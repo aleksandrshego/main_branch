@@ -1,0 +1,27 @@
+#include <iostream>
+#include "qsortCustom.h"
+
+using namespace std;
+
+void sort(int* a, const int& first, const int& last) // метод быстрой сортировки
+{
+	int i = first, j = last, m = a[(last + first) / 2];
+	do {
+		while (a[i] < m)
+			i++;
+		while (a[j] > m)
+			j--;
+
+		if (i <= j)
+		{
+			if (a[i] > a[j])
+				swap(a[i], a[j]);
+			i++;
+			j--;
+		}
+	} while (i <= j);
+	if (i < last)
+		sort(a, i, last);
+	if (first < j)
+		sort(a, first, j);
+}

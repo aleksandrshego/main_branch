@@ -1,0 +1,47 @@
+#include <iostream>
+#include <iomanip>
+
+using namespace std;
+struct Student
+{
+	char name[30];
+	int evaluations[3];
+};
+
+void input(int n, Student* f)
+{
+	for (int i = 0; i < n; i++)
+	{
+		cin.get();
+		cout << "Input FIO:\n";
+		cin.getline(f[i].name, 30);
+		cout << "Input 3 evaluations:\n";
+		for (int j = 0; j < 3; j++)
+			cin >> f[i].evaluations[j];
+	}
+}
+double average(Student f)
+{
+	double k = 0;
+	for (int j = 0; j < 3; j++)
+		k += f.evaluations[j];
+	return k / 3;
+}
+
+void main()
+{
+	int n;
+	cout << "Input number of students:\n";
+	cin >> n;
+	Student* group = new Student[n];
+	input(n, group);
+	cout << "Average evaluations\n";
+
+	int average_mark_all_group = 0;
+	for (int i = 0; i < n; i++)
+	{
+		cout << group[i].name << "\t" << setprecision(3) << average(group[i]) << endl;
+
+
+	}
+}

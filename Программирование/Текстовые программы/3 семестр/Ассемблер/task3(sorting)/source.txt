@@ -1,0 +1,172 @@
+/*
+	Разработать алгоритм и составить программу для решения одного из вариантов задач. Все действия ваших алгоритмов должны выполняться в ассемблерных вставках, в коде C++ - только создание переменных, ввод и вывод в консоль.
+	Длина массива должна вводиться с консоли (т.е. должны использоваться динамические массивы). Параметр К в вариантах, где он есть, тоже должен вводиться с консоли.
+	Элементы массивов должны иметь тип int (32-битные целые числа). Если в условии варианта не сказано иначе, элементы массивов могут быть отрицательными. (например, натуральные числа и цифры – строго положительные).
+	Допускается инициализация массивов случайными числами, удовлетворяющим ограничениям условия.
+
+	Задание:
+	Преобразовать целочисленный массив, расположив сначала четные элементы, затем нечетные, сохранив порядок.
+*/
+
+
+#pragma warning(disable:4789)
+#include <iostream>
+#include <conio.h>
+#include <time.h>
+
+using namespace std;
+
+int get_size()
+{
+	int size = 0;
+	cout << "Введите размерность: ";
+	while (size <= 0)
+		cin >> size;
+
+	return size;
+}
+
+void output(const int& size, const int* ar)
+{
+	for (int i = 0; i < size; ++i)
+		cout << ar[i] << " ";
+	cout << "\n";
+}
+
+void random_input(const int& size, int* ar)
+{
+	int a, b;
+	cout << "Введите интервал:\nот - "; cin >> a;
+	cout << "до - "; cin >> b;
+
+	if (a > b)
+		swap(a, b);
+
+	srand(time(NULL));
+	for (int i = 0; i < size; ++i)
+	{
+		ar[i] = rand() % (b - a + 1) + a;
+
+		while (ar[i] == 0)
+			ar[i] = rand() % (b - a + 1) + a;
+	}
+
+	cout << "Полученный массив:\n";
+	output(size, ar);
+}
+
+void manual_input(const int& size, int* ar)
+{
+	cout << "Введите элементы:\n";
+
+	for (int i = 0; i < size; ++i)
+		cin >> ar[i];
+
+	cout << "Полученный массив:\n";
+	output(size, ar);
+}
+
+void choice(const int& size, int* ar)
+{
+	cout << "Выберите один из вариантов заполнения массива:\
+			\n1) - ручной ввод;\
+			\n2) - автоматический ввод с ограничениями.\n";
+	switch (_getch())
+	{
+	case '1':
+	{
+		system("cls");
+		manual_input(size, ar);
+		break;
+	}
+	case '2':
+	{
+		system("cls");
+		random_input(size, ar);
+		break;
+	}
+	default:
+		system("cls");
+		cout << "Введена неверная клавиша.\nПопробуйте ещё раз.\n";
+		choice(size, ar);
+		break;
+	}
+}
+
+int main()
+{
+	setlocale(0, "rus");
+
+	int n = get_size(), two{ 2 };
+
+	int* arr = new int[n];
+
+	choice(n, arr);
+
+	__asm
+	{
+		xor eax, eax
+		xor ebx, ebx // массив
+		xor ecx, ecx // количество общих проходов
+		xor edx, edx
+		xor esi, esi // проход по циклу для проверки
+
+		mov ebx, arr
+		mov eax, n
+		div two
+		mov ecx, eax
+		dec n
+
+		start :
+
+	cycle:
+		mov eax, [ebx + 4 * esi]
+			xor edx, edx
+			div two
+
+			cmp edx, 0
+			jne nex
+			je step
+
+			nex :
+		inc esi
+			mov eax, [ebx + 4 * esi]
+			dec esi
+			xor edx, edx
+			div two
+
+			cmp edx, 0
+			je xchange
+			jne step
+
+			xchange :
+		xor edx, edx
+			mov eax, [ebx + 4 * esi]
+			inc esi
+			mov edx, [ebx + 4 * esi]
+			dec esi
+			xchg eax, edx
+
+			mov[ebx + 4 * esi], eax
+
+			inc esi
+			mov[ebx + 4 * esi], edx
+			dec esi
+
+			step :
+
+		cmp esi, n
+			inc esi
+			jb cycle
+
+			xor esi, esi
+			loop start
+
+			inc n
+	}
+
+	cout << "\nОтсортированный массив:\n";
+	output(n, arr);
+
+	return EXIT_SUCCESS;
+}

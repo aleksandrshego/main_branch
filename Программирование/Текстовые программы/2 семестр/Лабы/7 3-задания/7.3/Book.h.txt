@@ -1,0 +1,32 @@
+#pragma once
+#include "Author.h"
+
+class Book
+{
+private:
+	int udk;
+	list<Author> authors;
+	string title;
+	int year;
+public:
+	Book(int udk, list<Author> authors, string title, int year) : udk(udk), authors(authors), title(title), year(year) {}
+	Book() : udk(0), authors(), title(""), year(0) {}
+
+	string GetTitle() const { return title; }
+	int GetYear() const { return year; }
+
+	void GetAuthors(list<Author>& list) const;
+	void SetAuthors(list<Author>& list);
+
+	void SetUDK(int udk) { this->udk = udk; }
+	void SetTitle(string title) { this->title = title; }
+	void SetYear(int year) { this->year = year; }
+	
+	
+	bool operator < (const Book& a) const;
+	bool operator > (const Book& a) const;
+	bool operator == (const Book& a) const;
+
+	friend ostream& operator << (ostream& out, const Book& a);
+};
+

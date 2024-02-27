@@ -1,0 +1,129 @@
+#include <iostream>
+
+using namespace std;
+
+int main()
+{
+	setlocale(0, "rus");
+	char str_source[256]{}, buffer[256]{}, str_final[256]{};
+
+	cout << "Введите текст:\n";
+	cin.getline(str_source, 255);
+
+	int length_word{}, counter{}, index_end{}, second_length, end_length{ (int)strlen(str_source) };
+
+	str_source[end_length] = ' ';
+	int length_str = strlen(str_source);
+
+	__asm {
+			xor edx, edx
+			xor edi, edi 
+			xor ebx, ebx // итерирование по исходной строке
+			xor eax, eax
+			xor ecx, ecx
+
+	start:
+			cmp length_str, 0
+			jne first_step
+			je end_prog
+
+	first_step:
+			mov al, [str_source + ebx]
+			cmp al, ' '
+			jne second_step
+			je word_selection
+
+	second_step:
+			mov [buffer + edx], al
+			inc length_word
+			inc ebx
+			inc edx
+			dec length_str
+			jmp start
+	}
+
+	__asm {
+	word_selection:
+			mov eax, length_word
+			mov [buffer + eax], '\0' // добавляем в конец строки "конец строки"
+
+			xor edx, edx
+			mov ecx, length_word
+			mov end_length, ecx
+			mov length_word, 0
+			inc ebx // для дальнейшего чтения с нового символа, а не пробела, то есть смещение указателя
+			mov second_length, ecx
+			lea esi, buffer
+
+	checker:
+			cmp second_length, 0
+			jg next_prov
+			je next_start
+
+	next_prov:
+			mov ah, [esi]
+			cmp ah, '0'
+			jl cleaner
+			cmp ah, '9'
+			ja cleaner
+
+			inc esi
+			dec second_length
+			inc counter
+			jmp checker
+	}
+
+	__asm {
+	cleaner:
+			mov counter, 0
+			cmp ecx ,0
+			jne replace_buffer_cl
+			je start
+
+	replace_buffer_cl:
+			mov[buffer + ecx - 1], ' '
+			dec ecx
+			jmp cleaner
+	}
+
+	__asm{
+	next_start:
+			mov edx, counter
+			xor ecx, ecx
+
+	cycle:
+			cmp edx, 0
+			jne next_iter
+			je l1
+
+	next_iter:
+			mov al, [buffer + ecx]
+			mov [str_final + edi], al
+			dec edx
+			inc ecx
+			inc edi
+			jmp cycle
+
+	l1:
+			mov [str_final + edi], ' ' // добавляем в конец подстроки пробел, чтобы в следующий раз написать новую подстроку
+			inc edi // ну и очевидно, что здесь перемещаем указатель ещё на один, чтобы уже в следующем начать записывать
+			mov counter, 0
+
+	clean_buffer:
+			cmp ecx, 0
+			jne replace_buffer_end
+			je start
+
+	replace_buffer_end:
+			dec ecx
+			mov [buffer + ecx], ' '
+			jmp clean_buffer
+
+	end_prog:
+		nop
+	}
+
+	cout << str_final;
+
+	return EXIT_SUCCESS;
+}

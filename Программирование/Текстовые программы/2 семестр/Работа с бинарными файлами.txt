@@ -1,0 +1,48 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+
+using namespace std;
+
+void print(int n[5])
+{
+	for (int i = 0; i < 5; ++i)
+		cout << n[i] << " ";
+	cout << "\n";
+}
+
+int main()
+{
+	/*int n[5] = { 1, 2, 3, 4, 5 };
+	
+	print(n);*/
+	string messege = "mama hello, I love you";
+	string decryption;
+
+	cout << messege << "\n";
+
+	ofstream out("output.txt", ios::out | ios::binary);
+	out.write((char*)&messege, sizeof messege);
+	out.close();
+	
+
+	ifstream fin("output.txt");
+	string jem;
+	getline(fin, jem);
+	cout << jem << "\n";
+	/*for (int i = 0; i < 5; ++i)
+		n[i] = 0;
+
+	print(n);*/
+	fin.close();
+
+	ifstream in("output.txt", ios::in | ios::binary);
+	in.read((char*)&decryption, sizeof decryption);
+
+	/*print(n);*/
+	cout << decryption << "\n";
+	in.close();
+
+
+	return 0; // нарушение прав доступа при записи по адресу 0xDDDDDDDD
+}

@@ -1,0 +1,72 @@
+#include <iostream>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+void Add(vector<vector<string>>& ts)
+{
+	int day;
+	string task;
+	cin >> day >> task;
+	ts[day - 1].push_back(task);
+}
+
+void Dump(const vector<vector<string>>& ts)
+{
+	int day;
+	cin >> day;
+	cout << ts[day - 1].size() << " ";
+	for (auto i : ts[day - 1])
+	{
+		cout << i << " ";
+	}
+	cout << "\n";
+}
+
+void NextMonth(int& index, vector<vector<string>>& ts, const vector<int>& m)
+{
+	index++;
+	if (index > 11)
+		index = 0;
+	vector<vector<string>> NewMonth = ts;
+	int a = ts.size();
+	int b = m[index];
+	ts.resize(b);
+	const int e = b - 1;
+	if (a > b) {
+		for (b; a > b; b++) {
+			ts[e].insert(end(ts[e]), begin(NewMonth[b]), end(NewMonth[b]));
+		}
+	}
+	NewMonth.clear();
+
+}
+
+int main()
+{
+	vector <int> days_in_month = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+	vector<vector<string>> tasks;
+	string operation;
+	int month = 0, Q;
+	tasks.resize(days_in_month[month]);
+	cin >> Q;
+	while (Q != 0)
+	{
+		cin >> operation;
+		if (operation == "ADD")
+		{
+			Add(tasks);
+		}
+		else if (operation == "DUMP")
+		{
+			Dump(tasks);
+		}
+		else if (operation == "NEXT")
+		{
+			NextMonth(month,tasks,days_in_month);
+		}
+		Q--;
+	}
+	return 0;
+}

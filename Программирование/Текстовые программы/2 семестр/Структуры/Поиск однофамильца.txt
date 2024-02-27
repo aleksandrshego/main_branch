@@ -1,0 +1,75 @@
+#include <iostream>
+#include <iomanip>
+#include <conio.h>
+using namespace std;
+
+struct Student
+{
+	char name[20];
+	char surname[30];
+	int group;
+	int course;
+};
+
+void input(int n, Student* f)
+{
+	for (int i = 0; i < n; i++)
+	{
+		cin.get();
+		cout << "Input name:\n";
+		cin >> f[i].name;
+		cout << "Input surname:\n";
+		cin >> f[i].surname;
+		cout << "Input group:\n";
+		cin >> f[i].group;
+		cout << "Input course:\n";
+		cin >> f[i].course;
+	}
+}
+
+//int find(int n, Student* f, char* s)
+//{
+//	for (int i = 0; i < n; i++)
+//		if (strcmp(f[i].surname, s) == 0) return i;
+//	return -1;
+//}
+//
+//void print(int n, Student* f, char* s)
+//{
+//	int i = find(n, f, s);
+//	if (i == -1) cout << "No such students!\n";
+//	else cout << f[i].surname << " " << f[i].name << " " << f[i].course << " course " << f[i].group << " group" << endl;
+//}
+
+void find_surnames(int n, Student* f, char* s)
+{
+	bool k = false;
+	for (int i = 0; i < n; i++)
+	{
+		if (_stricmp(f[i].surname, s) == 0)
+		{
+			cout << f[i].surname << " " << f[i].name << " " << f[i].course << " course " << f[i].group << " group\n";
+			k = true;
+		}
+	}
+	if (!k)
+		cout << "No such students!\n";
+}
+
+void main()
+{
+	int n;
+	cout << "Input number of students:\n";
+	cin >> n;
+	if (n < 0)
+		n = fabs(n);
+	Student* students = new Student[n];
+	input(n, students);
+	char s[30];
+	cout << "Enter the surname of the desired student:\n";
+	cin >> s;
+	system("cls");
+	find_surnames(n, students, s);
+	//print(n, students, s);
+	delete[] students;
+}

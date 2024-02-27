@@ -1,0 +1,21 @@
+#include <iostream>
+
+using namespace std;
+
+int main()
+{
+	int A, B, x;
+	cin >> A >> B;
+	x = A;
+	do {
+		if (x >= 1)
+		{
+			if (x % 2 == 0)
+			{
+				cout << x << " ";
+			}
+			x++;
+		}
+	} while (x <= B);
+	return 0;
+}

@@ -1,0 +1,238 @@
+#include "SoftWareDef.h"
+
+/*
+Написать приложение, содержащее не менее двух
+тредов. Каждый из этих тредов должен искать файлы:
+- с определенным шаблоном;
+- содержащие в своем составе определенную строку;
+- начиная с определенного директория;
+- обеспечить возможность поиска в поддиректориях.
+Все треды должны помещать результаты своей работы в один и тот же список
+строк (используйте любой подходящий визуальный компонент, который можно связать
+со списком строк). Требуется обеспечить синхронизацию записи в список и обращения
+нескольких тредов к одному и тому же файлу. Допускается при выполнении этого задания
+модифицировать приложение, созданное в первой лабораторной работе.
+ Написать приложение, содержащее два треда. Первый из них, как и ранее,
+производит поиск файлов по шаблону. Второй тред запускает редактирование первого из
+найденных файлов.
+*/
+
+void _forSearchPriority(HWND& hComboboxElement)
+{
+	TCHAR SearchesPriority[5][40] =
+	{
+		TEXT("Низшая приоритетность"),TEXT("Ниже средней приоритетности"),TEXT("Средняя приоритетность"),TEXT("Выше средней приоритетности"),TEXT("Высшая приоритетность")
+	};
+	TCHAR search_prior[40];
+	memset(&search_prior, 0, sizeof(search_prior));
+	for (int k = 0; k < 5; k++)
+	{
+		wcscpy_s(search_prior, sizeof(search_prior) / sizeof(TCHAR), (TCHAR*)SearchesPriority[k]);
+		SendMessage(hComboboxElement, (UINT)CB_ADDSTRING, (WPARAM)0, (LPARAM)search_prior);
+	}
+}
+
+void _forSearch(HWND& hComboboxElement)
+{
+	TCHAR Searches[3][40] =
+	{
+		TEXT("Поиск всех файлов"),TEXT("Только дирректорий"), TEXT("Текстовые файлы со строкой")
+	};
+	TCHAR search[40];
+	memset(&search, 0, sizeof(search));
+	for (int k = 0; k < 3; k++)
+	{
+		wcscpy_s(search, sizeof(search) / sizeof(TCHAR), (TCHAR*)Searches[k]);
+		SendMessage(hComboboxElement, (UINT)CB_ADDSTRING, (WPARAM)0, (LPARAM)search);
+	}
+}
+
+void WndAddWidgets(HWND hWnd)
+{
+	//Кнопки
+	CreateWindowA("button", "Старт", WS_VISIBLE | WS_CHILD | ES_CENTER, 5, 200, 180, 30, hWnd, (HMENU)OnButtonStart, NULL, NULL);
+	CreateWindowA("button", "Стоп", WS_VISIBLE | WS_CHILD | ES_CENTER, 195, 200, 180, 30, hWnd, (HMENU)OnButtonStop, NULL, NULL);
+	CreateWindowA("button", "Продолжить", WS_VISIBLE | WS_CHILD | ES_CENTER, 5, 235, 180, 30, hWnd, (HMENU)OnButtonContinue, NULL, NULL);
+	CreateWindowA("button", "Пауза", WS_VISIBLE | WS_CHILD | ES_CENTER , 195, 235, 180, 30, hWnd, (HMENU)OnButtonPause, NULL, NULL);
+	//Панель вывода
+	OutputPanel = CreateWindowA("listbox", NULL, WS_VISIBLE | WS_CHILD | WS_VSCROLL | WS_TABSTOP | WS_BORDER | LBS_DISABLENOSCROLL , 430, 20, 540, 530, hWnd, (HMENU)LIST_OUTPUT, NULL, NULL);
+	//Статические строки
+	CreateWindowA("static", "Введите шаблон файла:", WS_VISIBLE | WS_CHILD | ES_LEFT, 5, 20, 190, 20, hWnd, NULL, NULL, NULL);
+	CreateWindowA("static", "Введите путь:", WS_VISIBLE | WS_CHILD | ES_LEFT, 5, 50, 190, 20, hWnd, NULL, NULL, NULL);
+	CreateWindowA("static", "Введите глубину поиска:", WS_VISIBLE | WS_CHILD | ES_LEFT, 5, 80, 190, 20, hWnd, NULL, NULL, NULL);
+	CreateWindowA("static", "Введите текст для поиска:", WS_VISIBLE | WS_CHILD | ES_LEFT, 5, 110, 190, 20, hWnd, NULL, NULL, NULL);
+	CreateWindowA("static", "Выберите вариант поиска:", WS_VISIBLE | WS_CHILD | ES_LEFT, 5, 140, 190, 20, hWnd, NULL, NULL, NULL);
+	CreateWindowA("static", "Выберите приоритет:", WS_VISIBLE | WS_CHILD | ES_LEFT, 5, 170, 190, 20, hWnd, NULL, NULL, NULL);
+	//Поля для ввода
+	hFileMask = CreateWindowA("edit", "", WS_VISIBLE | WS_CHILD | ES_CENTER | WS_BORDER, 200, 20, 200, 20, hWnd, NULL, NULL, NULL);
+	hFilePath = CreateWindowA("edit", "", WS_VISIBLE | WS_CHILD | ES_CENTER | WS_BORDER, 200, 50, 200, 20, hWnd, NULL, NULL, NULL);
+	hFileDepth = CreateWindowA("edit", "", WS_VISIBLE | WS_CHILD | ES_CENTER | WS_BORDER, 200, 80, 200, 20, hWnd, NULL, NULL, NULL);
+	hTextForSearching = CreateWindowA("edit", "", WS_VISIBLE | WS_CHILD | ES_CENTER | WS_BORDER, 200, 110, 200, 20, hWnd, NULL, NULL, NULL);
+	//Боксы для выбора
+	hSearchType = CreateWindowA("combobox", {}, CBS_DROPDOWN | CBS_HASSTRINGS | WS_CHILD | WS_OVERLAPPED | WS_VISIBLE, 200, 139, 225, 100, hWnd, NULL, NULL, NULL);
+	hSearchPriority = CreateWindowA("combobox", {}, CBS_DROPDOWN | CBS_HASSTRINGS | WS_CHILD | WS_OVERLAPPED | WS_VISIBLE, 200, 169, 225, 100, hWnd, NULL, NULL, NULL);
+	//Под боксы
+	_forSearchPriority(hSearchPriority);
+	_forSearch(hSearchType);
+	
+	//Кнопки
+	CreateWindowA("button", "Старт", WS_VISIBLE | WS_CHILD | ES_CENTER, 5, 480, 180, 30, hWnd, (HMENU)_OnButtonStart, NULL, NULL);
+	CreateWindowA("button", "Стоп", WS_VISIBLE | WS_CHILD | ES_CENTER, 195, 480, 180, 30, hWnd, (HMENU)_OnButtonStop, NULL, NULL);
+	CreateWindowA("button", "Продолжить", WS_VISIBLE | WS_CHILD | ES_CENTER, 5, 515, 180, 30, hWnd, (HMENU)_OnButtonContinue, NULL, NULL);
+	CreateWindowA("button", "Пауза", WS_VISIBLE | WS_CHILD | ES_CENTER, 195, 515, 180, 30, hWnd, (HMENU)_OnButtonPause, NULL, NULL);
+	//Статические строки
+	CreateWindowA("static", "Введите шаблон файла:", WS_VISIBLE | WS_CHILD | ES_LEFT, 5, 300, 190, 20, hWnd, NULL, NULL, NULL);
+	CreateWindowA("static", "Введите путь:", WS_VISIBLE | WS_CHILD | ES_LEFT, 5, 330, 190, 20, hWnd, NULL, NULL, NULL);
+	CreateWindowA("static", "Введите глубину поиска:", WS_VISIBLE | WS_CHILD | ES_LEFT, 5, 360, 190, 20, hWnd, NULL, NULL, NULL);
+	CreateWindowA("static", "Введите текст для поиска:", WS_VISIBLE | WS_CHILD | ES_LEFT, 5, 390, 190, 20, hWnd, NULL, NULL, NULL);
+	CreateWindowA("static", "Выберите вариант поиска:", WS_VISIBLE | WS_CHILD | ES_LEFT, 5, 420, 190, 20, hWnd, NULL, NULL, NULL);
+	CreateWindowA("static", "Выберите приоритет:", WS_VISIBLE | WS_CHILD | ES_LEFT, 5, 450, 190, 20, hWnd, NULL, NULL, NULL);
+	//Поля для ввода
+	_hFileMask = CreateWindowA("edit", "", WS_VISIBLE | WS_CHILD | ES_CENTER | WS_BORDER, 200, 300, 200, 20, hWnd, NULL, NULL, NULL);
+	_hFilePath = CreateWindowA("edit", "", WS_VISIBLE | WS_CHILD | ES_CENTER | WS_BORDER, 200, 330, 200, 20, hWnd, NULL, NULL, NULL);
+	_hFileDepth = CreateWindowA("edit", "", WS_VISIBLE | WS_CHILD | ES_CENTER | WS_BORDER, 200, 360, 200, 20, hWnd, NULL, NULL, NULL);
+	_hTextForSearching = CreateWindowA("edit", "", WS_VISIBLE | WS_CHILD | ES_CENTER | WS_BORDER, 200, 390, 200, 20, hWnd, NULL, NULL, NULL);
+	//Боксы для выбора
+	_hSearchType = CreateWindowA("combobox", {}, CBS_DROPDOWN | CBS_HASSTRINGS | WS_CHILD | WS_OVERLAPPED | WS_VISIBLE, 200, 420, 225, 100, hWnd, NULL, NULL, NULL);
+	_hSearchPriority = CreateWindowA("combobox", {}, CBS_DROPDOWN | CBS_HASSTRINGS | WS_CHILD | WS_OVERLAPPED | WS_VISIBLE, 200, 450, 225, 100, hWnd, NULL, NULL, NULL);
+	//Под боксы
+	_forSearchPriority(_hSearchPriority);
+	_forSearch(_hSearchType);
+}
+
+LRESULT CALLBACK MainProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
+{
+	switch (msg)
+	{
+		case WM_COMMAND:
+		{	
+			switch (wp)
+			{
+				case OnButtonStart:
+				{
+					TerminateThread(thread_first, 0);
+					const int priority = SendMessage(hSearchPriority, CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
+					if (priority < 5 && priority > -1)
+					{
+						const int search_type = SendMessage(hSearchType, CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
+						if (search_type < 3 && search_type > -1)
+						{
+							if (search_type == 0)
+							{
+								thread_first = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)search_all, NULL, 0, NULL);
+							}
+							if (search_type == 1)
+							{
+								thread_first = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)search_directories, NULL, 0, NULL);
+							}
+							if (search_type == 2)
+							{
+								thread_first = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)search_file_with_text, NULL, 0, NULL);
+							}
+						}
+						else
+							MessageBoxA(NULL, LPSTR("Поверьте выбранный вариант"), LPSTR("Информация"), (UINT)MB_OK);
+					}
+					else
+						MessageBoxA(NULL, LPSTR("Проверьте выбранный приоритет"), LPSTR("Информация"), (UINT)MB_OK);
+					break;
+				}
+				case OnButtonPause:
+				{
+					SuspendThread(thread_first);
+					break;
+				}
+				case OnButtonContinue:
+				{
+					ResumeThread(thread_first);
+					break;
+				}
+				case OnButtonStop:
+				{
+					TerminateThread(thread_first, 0);
+					SendDlgItemMessageA(MainWindow, LIST_OUTPUT, LB_RESETCONTENT, 0, 0);
+					break;
+				}
+				case _OnButtonStart:
+				{
+					TerminateThread(thread_second, 0);
+					const int priority = SendMessage(_hSearchPriority, CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
+					if (priority < 5 && priority > -1)
+					{
+						const int search_type = SendMessage(_hSearchType, CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
+						if (search_type < 3 && search_type > -1)
+						{
+							if (search_type == 0)
+							{
+								thread_second = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)_search_all, NULL, 0, NULL);
+							}
+							if (search_type == 1)
+							{
+								thread_second = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)_search_directories, NULL, 0, NULL);
+							}
+							if (search_type == 2)
+							{
+								thread_second = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)_search_file_with_text, NULL, 0, NULL);
+							}
+						}
+						else
+							MessageBoxA(NULL, LPSTR("Поверьте выбранный вариант"), LPSTR("Информация"), (UINT)MB_OK);
+					}
+					else
+						MessageBoxA(NULL, LPSTR("Проверьте выбранный приоритет"), LPSTR("Информация"), (UINT)MB_OK);
+					break;
+				}
+				case _OnButtonPause:
+				{
+					SuspendThread(thread_second);
+					break;
+				}
+				case _OnButtonContinue:
+				{
+					ResumeThread(thread_second);
+					break;
+				}
+				case _OnButtonStop:
+				{
+					TerminateThread(thread_second, 0);
+					SendDlgItemMessageA(MainWindow, LIST_OUTPUT, LB_RESETCONTENT, 0, 0);
+					break;
+				}
+				default:
+					break;
+			}
+				break;
+		}
+		case WM_CREATE:
+		{
+			WndAddWidgets(hWnd);
+			break;
+		}
+		case WM_DESTROY:
+		{
+			TerminateThread(thread_first, 0);
+			TerminateThread(thread_second, 0);
+			ExitThread(0);
+			break;
+		}
+		default:
+			return DefWindowProc(hWnd, msg, wp, lp);
+	}
+}
+
+int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdshow)
+{
+	setlocale(LC_ALL, "rus");
+	SetConsoleCP(1251);
+	SetConsoleOutputCP(1251);
+
+	WNDCLASS SoftwareMainClass = NewWindowClass(hInst, L"MainWindow", MainProcedure);
+	if (!RegisterClass(&SoftwareMainClass)) { return -1; }
+	MSG SoftwareMainMessage = { 0 };
+	MainWindow = CreateWindow(L"MainWindow", L"Поисковик", WS_OVERLAPPEDWINDOW | WS_VISIBLE, 100, 100, 1000, 600, NULL, NULL, NULL, NULL);
+	while (GetMessage(&SoftwareMainMessage, NULL, NULL, NULL))
+	{
+		TranslateMessage(&SoftwareMainMessage);
+		DispatchMessage(&SoftwareMainMessage);
+	}
+}

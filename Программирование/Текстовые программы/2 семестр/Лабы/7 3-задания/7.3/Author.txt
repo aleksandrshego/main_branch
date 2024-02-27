@@ -1,0 +1,34 @@
+#include "Author.h"
+
+bool Author::operator<(const Author& a) const
+{
+    if (surname == a.surname)
+    {
+        if (name == a.name)
+            return patronymic < a.patronymic;
+        return name < a.name;
+    }
+    return surname < a.surname;
+}
+
+bool Author::operator>(const Author& a) const
+{
+    if (surname == a.surname)
+    {
+        if (name == a.name)
+            return patronymic > a.patronymic;
+        return name > a.name;
+    }
+    return surname > a.surname;
+}
+
+bool Author::operator==(const Author& a) const
+{
+    return surname == a.surname && name == a.name && patronymic == a.patronymic;
+}
+
+ostream& operator<<(ostream& out, const Author& a)
+{
+    out << a.surname << " " << a.name << " " << a.patronymic;
+    return out;
+}

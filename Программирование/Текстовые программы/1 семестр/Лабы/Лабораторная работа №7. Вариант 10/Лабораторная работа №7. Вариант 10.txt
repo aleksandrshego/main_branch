@@ -1,0 +1,147 @@
+/*                    
+			ЛАБОРАТОРНАЯ РАБОТА №7. ВАРИАНТ 10. ШЕГО АЛЕКСАНДР
+	Строка состоит из слов. Получить новую строку, в начале которой на
+	нечетном месте должно стоять слово только из цифр, а на четном – другое
+	слово. В конце новой строки поместить те слова, которые не могут быть
+	записаны согласно приведенному правилу.
+*/
+
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <sstream>
+using namespace std;
+
+void PrintString(string& s) // ввод строки
+{
+	cout << "Введите слова:" << endl;
+	getline(cin, s);
+}
+
+void SeparationStr(string& s, vector<string>& l) // разделение строки по векторам
+{
+	istringstream str(s);
+	int n = 0;
+	string input;
+	while (str >> input)
+	{
+		l.push_back(input);
+	}
+	//int j = 1; // в любом случае будет одно слово
+	//for (int i = 0; i < s.length(); i++)
+	//{
+	//	if (s[i] == ' ')
+	//		j++;
+	//}
+	//int size = j;
+	//j = 0;
+	//l.resize(size);
+	//for (int i = 0; i < s.length(); i++)
+	//{
+	//	if (s[i] == ' ')
+	//	{
+	//		j++; // делает новое слово
+	//		continue;
+	//	}
+	//	l[j] += s[i];
+	//}
+	//s.clear();
+}
+
+void AnalysisLine(vector<string>& l, vector<string>& v, vector<string>& v_a_let, vector<string>& let, int& i_val, int& i_val_a_let, int& i_let)
+{
+	for (auto i : l)
+	{
+		int n = 0;
+		bool k = false, p = false;
+		for (int j = 0; j < i.size(); j++)
+		{
+			if (i[j] >= 'A' && i[j] <= 'Z' || i[j] >= 'a' && i[j] <= 'z') // проверка на буквы в слове
+				k = true;
+			if (i[j] >= '0' && i[j] <= '9') // проверка на цифры в слове
+				p = true;
+		}
+		if (k && p) // буква и число
+		{
+			i_val_a_let++;
+			v_a_let.push_back(i);
+		}
+		else if (k) // буква
+		{
+			i_let++;
+			let.push_back(i);
+		}
+		else if (p) // число
+		{
+			i_val++;
+			v.push_back(i);
+		}
+	}
+	l.clear();
+}
+
+void AssignmentNewStr(string& nl, vector<string>& v, vector<string>& v_a_let, vector<string>& let, int& i_val, int& i_val_a_let, int& i_let)
+{
+	int n = i_val + i_val_a_let + i_let;
+	for (int i = 1; i <= n; i++)
+	{ 
+		if (i != 1)
+			nl += " ";
+		if (i % 2 != 0 && i_val != 0)
+		{
+			nl += v[i_val - 1];
+			i_val--;
+		}
+		else if (i % 2 == 0 && i_val != 0)
+		{
+			if (i_val_a_let != 0)
+			{
+				nl += v_a_let[i_val_a_let - 1];
+				i_val_a_let--;
+			}
+			else if (i_let != 0)
+			{
+				nl += let[i_let - 1];
+				i_let--;
+			}
+		}
+		else if (i_val == 0)
+		{
+			if (i_val_a_let != 0)
+			{
+				nl += v_a_let[i_val_a_let - 1];
+				i_val_a_let--;
+			}
+			else if (i_let != 0)
+			{
+				nl += let[i_let - 1];
+				i_let--;
+			}
+		}
+	}
+	v.clear();
+	v_a_let.clear();
+	let.clear();
+}
+
+void PrintStr(const string& nl)
+{
+	cout << endl << "Слова, которые мы поменяли местами:" << endl << nl << endl;
+}
+
+int main()
+{
+	setlocale(LC_ALL, "rus");
+	int index_val = 0, index_val_a_let = 0, index_let = 0;
+	string str;
+	string newLine;
+	vector <string> line;
+	vector <string> value, value_and_letter, letter;
+	PrintString(str);
+	SeparationStr(str, line);
+	AnalysisLine(line, value, value_and_letter, letter, index_val, index_val_a_let, index_let);
+	AssignmentNewStr(newLine, value, value_and_letter, letter, index_val, index_val_a_let, index_let);
+	PrintStr(newLine);
+	return 0;
+}

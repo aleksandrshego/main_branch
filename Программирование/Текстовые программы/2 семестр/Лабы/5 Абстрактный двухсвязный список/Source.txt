@@ -1,0 +1,224 @@
+/*
+
+	Разработать абстрактный базовый класс для работы с двухсвязным списком.
+	Работа с элементами конкретного типа реализуется в производном классе за
+	счет использования механизма виртуальных функций. Написать тестовую программу.
+
+	What with destructor?!
+*/
+
+#include "List_int.h"
+#include "List_double.h"
+#include "List_char.h"
+
+using LI = List_int;
+using LD = List_double;
+using LC = List_char;
+
+using std::cout;
+
+int main()
+{
+
+	LC list;
+	char* name = new char[25];
+
+	list.AddBegin(name);
+	list.AddEnd((char*)"Two");
+	list.AddEnd((char*)"Three");
+	list.AddEnd((char*)"Four");
+
+	list.Print();
+	cout << "\n";
+
+	list.SetElement((char*)"NewElement", 2);
+	cout << "After set element:\n";
+	list.Print();
+	cout << "\n";
+
+	list.Delete(2);
+	cout << "After delete element:\n";
+	list.Print();
+	cout << "GetCount: " << list.GetCount() << "\n\n";
+
+	list.Insert((char*)"NewThree", 2);
+	cout << "After insert new element:\n";
+	list.Print();
+	cout << "\n";
+
+	list.Reverse();
+	cout << "After reverse list:\n";
+	list.Print();
+	cout << "GetCount: " << list.GetCount() << "\n\n";
+
+	list.Clear();
+	cout << "After clear list:\n";
+	list.Print();
+
+	return 0;
+}
+	//LI k;
+	//int l = 5;
+
+	//k.AddBegin(&l);
+	//k.AddBegin(&l);
+	//l = 10; k.AddEnd(&l);
+	//l = -1; k.AddEnd(&l);
+	//l = 10000;
+
+	//k.SetElement(&l, 0); // изменение первого элемента
+	//cout << "The first element: " << *((int*)k.GetElement(0)) << "\n"; // получение значения первого элемента
+	//cout << "\nAll list:\n";
+	//k.Print();
+
+	//l = -1234;
+	//cout << "\nInsert element: " << l << "\n";
+	//k.Insert(&l, 3); // вставка элемента на 3-ю позицию
+	//k.Print();
+	//cout << "\n";
+
+	//cout << "Number of elements: " << k.GetCount() << "\n";
+	//k.Delete(3);
+	//cout << "Now (after delete number 3 element) number of elements: " << k.GetCount() << "\n";
+	//cout << "\nList is now:\n";
+	//k.Print();
+
+	//k.Reverse();
+	//cout << "\nList after reverse:\n";
+	//k.Print();
+
+	//List_int p(k);
+
+	//k.Clear(); // очистка списка k (далее он будет пустой)
+	//cout << "\nClean list.\n";
+	//k.Print();
+
+	//p.Print();
+
+	//return 0;
+	
+
+/*	!!! FOR TYPE INT !!!
+
+	LI k;
+	int l = 5;
+
+	k.AddBegin(&l);
+	k.AddBegin(&l);
+	l = 10; k.AddEnd(&l);
+	l = -1; k.AddEnd(&l);
+	l = 10000;
+
+	k.SetElement(&l, 0); // изменение первого элемента
+	cout << "The first element: " << *((int*)k.GetElement(0)) << "\n"; // получение значения первого элемента
+	cout << "\nAll list:\n";
+	k.Print();
+
+	l = -1234;
+	cout << "\nInsert element: " << l << "\n";
+	k.Insert(&l, 3); // вставка элемента на 3-ю позицию
+	k.Print();
+	cout << "\n";
+
+	cout << "Number of elements: " << k.GetCount() << "\n";
+	k.Delete(3);
+	cout << "Now (after delete number 3 element) number of elements: " << k.GetCount() << "\n";
+	cout << "\nList is now:\n";
+	k.Print();
+
+	k.Reverse();
+	cout << "\nList after reverse:\n";
+	k.Print();
+
+	List_int p(k);
+
+	k.Clear(); // очистка списка k (далее он будет пустой)
+	cout << "\nClean list.\n";
+	k.Print();
+
+	p.Print();
+
+*/
+
+/*	!!! FOR TYPE DOUBLE !!!
+
+	LD k;
+	double l = 5.554;
+
+	k.AddBegin(&l);
+	k.AddBegin(&l);
+	l = 1.120; k.AddEnd(&l);
+	l = -1.3; k.AddEnd(&l);
+	l = 10.12;
+
+	k.SetElement(&l, 0); // изменение первого элемента
+	cout << "The first element: " << *((double*)k.GetElement(0)) << "\n"; // получение значения первого элемента
+	cout << "\nAll list:\n";
+	k.Print();
+
+	l = -123.4;
+	cout << "\nInsert element: " << l << "\n";
+	k.Insert(&l, 3); // вставка элемента на 3-ю позицию
+	k.Print();
+	cout << "\n";
+
+	cout << "Number of elements: " << k.GetCount() << "\n";
+	k.Delete(3);
+	cout << "Now (after delete number 3 element) number of elements: " << k.GetCount() << "\n";
+	cout << "\nList is now:\n";
+	k.Print();
+
+	k.Reverse();
+	cout << "\nList after reverse:\n";
+	k.Print();
+
+	LD p(k);
+
+	k.Clear(); // очистка списка k (далее он будет пустой)
+	cout << "\nClean list.\n";
+	k.Print();
+
+	p.Print();
+*/
+
+	/*!!!	FOR TYPE CHAR* !!!
+
+	LC list;
+	char* name = new char[25];
+	list.AddBegin((char*)"One");
+	list.AddEnd((char*)"Two");
+	list.AddEnd((char*)"Three");
+	list.AddEnd((char*)"Four");
+
+	list.Print();
+	cout << "\n";
+
+	list.SetElement((char*)"NewElement", 2);
+	cout << "After set element:\n";
+	list.Print();
+	cout << "\n";
+
+	list.Delete(2);
+	cout << "After delete element:\n";
+	list.Print();
+	cout << "GetCount: " << list.GetCount() << "\n\n";
+
+	list.Insert((char*)"NewThree", 2);
+	cout << "After insert new element:\n";
+	list.Print();
+	cout << "\n";
+
+	list.Reverse();
+	cout << "After reverse list:\n";
+	list.Print();
+	cout << "GetCount: " << list.GetCount() << "\n\n";
+
+	list.Clear();
+	cout << "After clear list:\n";
+	list.Print();*/
+
+
+//#include <typeinfo>
+//#include <cctype>
+//int k = 10;
+//cout << strcmp(typeid(k).name(), "int"); // сравнение, ведь typeid возвращает название типа.

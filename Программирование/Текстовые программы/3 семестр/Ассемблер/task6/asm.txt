@@ -1,0 +1,50 @@
+.386
+PUBLIC _max@8
+
+.model flat
+.data
+.code
+_max@8 proc
+	push ebp
+	mov ebp, esp
+	push [ebp + 12] // size
+	push [ebp + 8] // arr*
+	call _solving
+	mov esp, ebp
+	pop ebp
+	ret 8
+_max@8 endp
+
+_solving proc stdcall, a: dword, b: dword
+	xor eax, eax
+	xor ebx, ebx
+	xor ecx, ecx
+	xor edx, edx
+	xor edi, edi
+	mov ecx, b
+	dec ecx
+	lea ebx, a
+	mov eax, [ebx]
+	mov edx, [eax]
+
+	jmp _start
+
+	_formax :
+		mov edx, edi
+		jmp _next
+
+	_start :
+		add eax, 4
+		mov edi, [eax]
+
+		cmp edi, edx
+		jg _formax
+	_next :
+		loop _start
+
+		mov eax, edx
+
+	ret
+_solving endp
+
+end	

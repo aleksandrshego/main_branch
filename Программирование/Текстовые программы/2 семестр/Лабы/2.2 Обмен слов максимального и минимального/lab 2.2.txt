@@ -1,0 +1,133 @@
+/*
+		Рассмотреть вариант с тем, когда слова одинаковы, скорее можно сделать
+		специальную финкцию prov():
+		 - на количество слов (если оно одно значит через try catch and exeption делать выбрасывание ошибки выходить из программы);
+		 - если слова два, значит проверяем, чтобы они не были одинаковыми, ибо смысл тогда  менять, если можно будет просто написать, что они одинаковы и выписать строку.
+*/
+
+#define _CRT_SECURE_NO_WARNINGS
+#include <iostream>
+#include <cstring>
+#include <iomanip>
+#include <Windows.h>
+
+using namespace std;
+
+char* fill_max_word(char* s, const char* del) // находим максимальное первое слово (<) - конкретно
+{
+	char* word = strtok(s, del);
+	char* max_w = word;
+
+
+	while (word != NULL)
+	{
+		if (strlen(max_w) < strlen(word))
+			max_w = word;
+		word = strtok(NULL, del);
+	}
+
+	return max_w;
+}
+
+
+
+char* fill_min_word(char* s, const char* del) // находим последнее минимальное слово (>=) - самое последнее
+{
+	char* word = strtok(s, del);
+	char* min_w = word;
+
+	while (word != NULL)
+	{
+		if (strlen(min_w) >= strlen(word))
+			min_w = word;
+		word = strtok(NULL, del);
+	}
+
+	return min_w;
+}
+
+void right_exchange(char* string, char* max_w, int& max_p, int& min_p, int& max_l, int& min_l)
+{
+	for (int i = min_p + min_l - 1, j = max_p + max_l - 1; i >= min_p; i--, j--) // написание минимального слова на максимальном
+		string[j] = string[i];
+
+	for (int i = max_p + max_l - min_l - 1, j = max_p - 1; j > min_p + min_l - 1; j--, i--) // то, что находится между максимальным и минимальным
+		string[i] = string[j];
+
+	for (int i = min_p, j = 0; j < max_l; i++, j++) // написание маскимального слова
+		string[i] = max_w[j];
+}
+
+void left_exchange(char* string, char* max_w, int& max_p, int& min_p, int& max_l, int& min_l)
+{
+	for (int i = max_p, j = min_p; j < min_p + min_l; i++, j++) // написание минимального слова на максимальном
+		string[i] = string[j];
+
+	for (int i = max_p + min_l, j = max_p + max_l; j < min_p; i++, j++) // то, что находится между максимальным и минимальным
+		string[i] = string[j];
+
+	for (int i = min_p + min_l - 1, j = max_l - 1; j >= 0; i--, j--) // написание маскимального слова
+		string[i] = max_w[j];
+}
+
+void choice(char* s, char* max_w, char* min_w, int& max_p, int& min_p, int& max_l, int& min_l)
+{
+	if (max_p > min_p)
+	{
+		cout << "The maximum word is to the right of the minimum.\n";
+		right_exchange(s, max_w, max_p, min_p, max_l, min_l);
+		cout << s << "\n";
+
+	}
+	else if (max_p == min_p || _stricmp(max_w, min_w) == 0)
+	{
+		cout << "There is only one word or the words are the same.\n";
+		cout << s << "\n";
+	}
+	else
+	{
+		cout << "The maximum word is to the left of the minimum.\n";
+		left_exchange(s, max_w, max_p, min_p, max_l, min_l);
+		cout << s << "\n";
+	}
+}
+
+void work_with_str(char* s)
+{
+	char str_copy[300], delim[]{ " ,.-/_|" };
+	strcpy(str_copy, s);
+
+	cout << "\n";
+
+	char* max_w = fill_max_word(str_copy, delim);
+	int max_l = strlen(max_w);
+	int max_p = (max_w - str_copy);
+	cout << "Maximum word is \"" << max_w << "\" -> position " << max_p + 1 << ".\n";
+	strcpy(str_copy, s);
+
+	char* min_w = fill_min_word(str_copy, delim);
+	int min_l = strlen(min_w);
+	int min_p = (min_w - str_copy);
+	cout << "Minimal word is \"" << min_w << "\" -> position " << min_p + 1 << ".\n";
+	strcpy(str_copy, s);
+
+	choice(s, max_w, min_w, max_p, min_p, max_l, min_l);
+}
+
+void input_text(char* s)
+{
+	cout << "Input the text:\n";
+	cin.getline(s, 300);
+}
+
+
+int main()
+{
+	SetConsoleCP(1251); // работа с русскими буквами, ибо setlocale не помогает // library #include <Windows.h>
+	SetConsoleOutputCP(1251);
+	char str[300];
+	input_text(str);
+	work_with_str(str);
+
+	return 0;
+}

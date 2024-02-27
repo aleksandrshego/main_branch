@@ -1,0 +1,252 @@
+#include "List_char.h"
+
+List_char::List_char()
+{
+    begin = end = nullptr;
+    count = 0;
+}
+
+List_char::List_char(const List_char& obj)
+{
+    Clear();
+    Element_char* t = obj.begin;
+    while (t != nullptr)
+    {
+        AddEnd((char*)t->data);
+        t = t->next;
+    }
+}
+
+List_char& List_char::operator=(const List_char& obj)
+{
+    Copy(obj);
+    return *this;
+}
+
+int List_char::GetCount()
+{
+    return count;
+}
+
+void List_char::AddBegin(void* data)
+{
+    try
+    {
+        Element_char* t = new Element_char;
+        t->data = ((char*)data);
+        t->prev = nullptr;
+        t->next = begin;
+
+        if (count == 0)
+            begin = end = t;
+        else
+        {
+            begin->prev = t;
+            begin = t;
+        }
+        count++;
+    }
+    catch (bad_alloc ex) // если не выделится память
+    {
+        cout << ex.what() << "\n";
+    }
+}
+
+void List_char::AddEnd(void* data)
+{
+    try
+    {
+        Element_char* t = new Element_char;
+        t->data = ((char*)data);
+        t->next = nullptr;
+        t->prev = end;
+
+        if (count == 0)
+        {
+            end = begin = t;
+        }
+        else
+        {
+            end->next = t;
+            end = t;
+        }
+        count++;
+    }
+    catch (bad_alloc ex)
+    {
+        cout << ex.what() << "\n";
+    }
+}
+
+void List_char::Print()
+{
+    if (count == 0)
+        cout << "List is empty.\n";
+    else
+    {
+        Element_char* t = begin;
+        for (int i = 0; i < count; i++)
+        {
+            cout << t->data << " ";
+            t = t->next;
+        }
+        cout << "\n";
+    }
+}
+
+void List_char::SetElement(void* data, int index)
+{
+    try
+    {
+        CorrectIndex(index);
+
+        Element_char* t = Move(index);
+        t->data = ((char*)data);
+    }
+    catch (exception& ex)
+    {
+        cout << ex.what() << "\n";
+    }
+}
+
+void* List_char::GetElement(int index)
+{
+    try
+    {
+        CorrectIndex(index);
+
+        Element_char* t = Move(index);
+
+        void* k = &(t->data);
+
+        return k;
+    }
+    catch (exception& ex)
+    {
+        cout << ex.what() << "\n";
+    }
+}
+
+void List_char::Insert(void* data, int index)
+{
+    try
+    {
+        if (index > count)
+            throw exception("The index is larger than the dimension.");
+        if (count == index)
+        {
+            AddEnd(data);
+            return;
+        }
+        if (index == 0)
+        {
+            AddBegin(data);
+            return;
+        }
+
+        Element_char* t = new Element_char;
+        t->data = ((char*)data);
+
+        Element_char* prev = Move(index - 1);
+        Element_char* next = prev->next;
+
+        t->prev = prev;
+        prev->next = t;
+        t->next = next;
+        next->prev = t;
+
+        count++;
+    }
+    catch (bad_alloc ex)
+    {
+        cout << ex.what() << "\n";
+    }
+    catch (exception& ex)
+    {
+        cout << ex.what() << "\n";
+    }
+}
+
+void List_char::Delete(int index)
+{
+    try
+    {
+        CorrectIndex(index);
+        if (count == 0)
+            return;
+
+        Element_char* t = Move(index);
+        Element_char* prev = t->prev;
+        Element_char* next = t->next;
+
+        if ((count > 1) && (prev != nullptr))
+            prev->next = next;
+        if ((count > 1) && (next != nullptr))
+            next->prev = prev;
+        if (index == 0)
+            begin = next;
+        if (index = count - 1)
+            end = prev;
+
+       /*delete t->data;*/
+        delete t;
+        count--;
+    }
+    catch (exception& ex)
+    {
+        cout << ex.what() << "\n";
+    }
+}
+
+void List_char::Reverse()
+{
+    List_char L;
+    Element_char* t = begin;
+    while (t != nullptr)
+    {
+        L.AddBegin((char*)(t->data));
+        t = t->next;
+    }
+
+    *this = L;
+}
+
+void List_char::Clear()
+{
+    int n = count; // сделали копию, так как count меняется при удалении, следовательно, появится ошибка
+    for (int i = 0; i < n; i++)
+        Delete(0);
+}
+
+void List_char::CorrectIndex(int index)
+{
+    if (index >= count)
+        throw exception("The index is larger than the dimension.");
+}
+
+void List_char::Copy(const List_char& obj)
+{
+    Clear(); // очищаем список, чтобы копировать содержимое другого списка
+
+    Element_char* t = obj.begin;
+
+    while (t != nullptr)
+    {
+        AddEnd(&(t->data));
+        t = t->next;
+    }
+}
+
+Element_char* List_char::Move(int index)
+{
+    Element_char* t = begin;
+
+    for (int i = 0; i < index; i++)
+        t = t->next;
+    return t;
+}
+
+List_char::~List_char()
+{
+    Clear();
+}

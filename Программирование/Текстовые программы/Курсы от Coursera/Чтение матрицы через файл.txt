@@ -1,0 +1,48 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+
+using namespace std;
+
+int main()
+{
+  setlocale(LC_ALL, "rus");
+  ifstream fin;
+  ofstream fout;
+  int n = 2, rows, columns;
+  int* arr = new int[n];
+
+  fin.open("IN.txt");
+  fout.open("out.txt");
+
+  if (!fin.is_open())
+  {
+    cout << "Ошибка fin.\n";
+  }
+  else if (!fout.is_open())
+  {
+    cout << "Ошибка fout.\n";
+  }
+  else
+  {
+    cout << "Файлы открыты.\n";
+    string str;
+    while (!fin.eof())
+    {
+      for (int i = 0; i < 2; i++)
+      {
+        fin >> arr[i];
+        cout << arr[i] << " ";
+      }
+    }
+    rows
+  }
+  fout.close();
+  fin.close();
+  return 0;
+}
+
+
+
+
+

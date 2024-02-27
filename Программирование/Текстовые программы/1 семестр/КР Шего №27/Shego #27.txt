@@ -1,0 +1,97 @@
+#include <iostream>
+#include <fstream>
+
+using namespace std;
+
+int main()
+{
+    setlocale(LC_ALL, "rus");
+    ifstream fin;
+    ofstream fout;
+
+    fin.open("IN27.txt");
+    fout.open("OUT27.txt");
+
+    if (!fin.is_open())
+    {
+        cout << "Ошибка открытия файла IN27.txt\n";
+    }
+    else if (!fout.is_open())
+    {
+        cout << "Ошибка открытия файла OUT27.txt\n";
+    }
+    else
+    {
+        cout << "Файлы открыты.\n";
+        if (fin.peek() != EOF)
+            cout << "Файл не пустой.\n";
+        else
+        {
+            cout << "\nОшибка. Файл пустой.\n";
+
+            fout.close();
+            fin.close();
+
+            return 0;
+        }
+        int x, i = 0, value, n_ne_mul = 0, prov = 0; //numbers_ne_multipre количество не кратных
+        fin >> x;
+        if (x > 20)
+        {
+            cout << "Задано количество элементов больше 20.";
+            fout << "Задано количество элементов больше 20.";
+            fout.close();
+            fin.close();
+            return 0;
+        }
+        int* arr = new int[x];
+        while (fin >> arr[i])
+        {
+            fout << arr[i] << "; ";
+            i++;
+            prov++;
+        }
+        if (prov < x || prov > x)
+        {
+            cout << "\nОшибка. Количество введённых элементов (больше) меньше, чем задано.\n";
+            fout << "\nОшибка. Количество введённых элементов (больше) меньше, чем задано.\n";
+
+            fout.close();
+            fin.close();
+            cout << "\nПрограмма завершена с ошибкой.\n";
+
+            return 0;
+        }
+        fout << "\n";
+        for (int i = 0; i < x; i++)
+        {
+            value = arr[i];
+            for (int j = 2; j <= value / 2; j++)
+                if (value % j == 0)
+                {
+                    arr[i] = 0;
+                    break;
+                }
+            if (arr[i] != 0)
+                n_ne_mul++;
+
+        }
+        if (n_ne_mul == 0)
+            fout << "\nПростых чисел в массиве нет.\n";
+        else
+        {
+            for (int i = 0; i < x; i++)
+            {
+                if (arr[i] != 0)
+                    fout << arr[i] << " ";
+            }
+        }
+        delete[] arr;
+        cout << "\nПрограмма завершена успешно.\n";
+    }
+
+    fout.close();
+    fin.close();
+
+    return 0;
+}

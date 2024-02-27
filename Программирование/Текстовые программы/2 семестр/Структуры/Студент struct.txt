@@ -1,0 +1,88 @@
+#include <iostream>
+#include <Windows.h>
+
+using namespace std;
+
+struct Student // задал по умолчанию заполнение каждого параментра
+{
+	char name[20] = "Null";
+	char surname[30] = "Null";
+	int course = 0;
+	int group = 0;
+	int evaluations[5] = { 0,0,0,0,0 };
+	double average_score = 0;
+};
+
+int number_students()
+{
+	int n;
+	cout << "Input number of students: ";
+	cin >> n;
+	system("cls");
+	return n;
+}
+
+void input(const int& n, Student* student)
+{
+	for (int i = 0; i < n; i++)
+	{
+		cin.get();
+		cout << "Input name: ";
+		cin >> student[i].name;
+		cout << "Input surname: ";
+		cin >> student[i].surname;
+		cout << "Input course: ";
+		cin >> student[i].course;
+		cout << "Input group: ";
+		cin >> student[i].group;
+		cout << "Input evaluations: ";
+		for (int j = 0; j < 5; j++)
+		{
+			cin >> student[i].evaluations[j];
+		}
+		system("cls");
+	}
+}
+
+double average_evaluations_of_student(const int k[])
+{
+	double sum = 0;
+	for (int i = 0; i < 5; i++)
+		sum += k[i];
+	return sum / 5;
+}
+
+void get_average_evaluations(Student* student, const int& i)
+{
+	student[i].average_score = average_evaluations_of_student(student[i].evaluations);
+}
+
+void output_students(Student* student, const int& n)
+{
+	for (int i = 0; i < n; i++)
+	{
+		cout << student[i].surname << " " << student[i].name << " " << student[i].course << " course " << student[i].group << " group\n";
+		get_average_evaluations(student, i);
+		cout << "Average score: " << student[i].average_score;
+		cout << "\n\n";
+	}
+}
+
+double average_all_evulations(Student* student, const int& n)
+{
+	double sum = 0;
+	for (int i = 0; i < n; i++)
+		sum += student[i].average_score;
+	return sum / n;
+}
+
+int main()
+{
+	int n = number_students();
+	Student* group = new Student[n];
+	input(n, group);
+	output_students(group, n);
+	cout << "The average score of the group: " << average_all_evulations(group, n);
+
+	delete[] group;
+}

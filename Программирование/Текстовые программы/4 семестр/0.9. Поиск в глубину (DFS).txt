@@ -1,0 +1,52 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <fstream>
+
+using namespace std;
+
+void dfs(const int& value, int& count, const vector<vector<int>>& adj, vector <bool>& used, vector<int>& pos) {
+	used[value] = true;
+	pos[value] = ++count;
+	for (auto k : adj[value]) {
+		if (!used[k]) {
+			dfs(k, count, adj, used, pos);
+		}
+	}
+}
+
+int main() {
+	ifstream fin("input.txt");
+	ofstream fout("output.txt");
+
+	int n; fin >> n;
+	vector <vector<int>> adj(n);
+	vector <bool> used(n, false);
+	vector <int> pos(n);
+
+	int x;
+	for (int i = 0; i < n; ++i) {
+		for (int j = 0; j < n; ++j) {
+			fin >> x;
+			if (x == 1) {
+				adj[i].push_back(j);
+			}
+		}
+	}
+
+
+	int count = 0;
+	for (int i = 0; i < n; ++i) {
+		if (!used[i]) {
+			dfs(i, count, adj, used, pos);
+		}
+	}
+	
+	for (auto k : pos) {
+		fout << k << " ";
+	}
+
+	fin.close();
+	fout.close();
+	return 0;
+}

@@ -1,0 +1,870 @@
+#pragma once
+
+#pragma comment(linker,"\"/manifestdependency:type='win32' \
+name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
+processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+	
+#include <iostream>
+#include <Windows.h>
+#include <string>
+#include <vector>
+#include <regex>
+#include <filesystem>
+#include <mutex>
+#include <fstream>
+
+using namespace std;
+
+#define LIST_OUTPUT			1
+//первое подменю
+#define OnButtonStart		2
+#define OnButtonPause		3
+#define OnButtonContinue	4
+#define OnButtonStop		5
+//второе подменю
+#define _OnButtonStart		6
+#define _OnButtonPause		7
+#define _OnButtonContinue	8
+#define _OnButtonStop		9
+
+HANDLE hMutex = NULL;
+HANDLE hMutexWork = NULL;
+
+
+HWND MainWindow;
+HWND OutputPanel;
+HWND hFileMask;
+HWND hFilePath;
+HWND hFileDepth;
+HWND hSearchPriority;
+HWND hSearchType;
+HWND hTextForSearching;
+char FileDepth[100];
+char c_path[256];
+char c_file_mask[50];
+char c_text_with_file[256];
+
+HWND _hFileMask;
+HWND _hFilePath;
+HWND _hFileDepth;
+HWND _hSearchPriority;
+HWND _hSearchType;
+HWND _hSearch;
+HWND _hTextForSearching;
+char _FileDepth[100];
+char _c_path[256];
+char _c_file_mask[50];
+char _c_text_with_file[256];
+
+HANDLE thread_first;
+HANDLE thread_second;
+HANDLE thread_open_file_first;
+HANDLE thread_open_file_second;
+
+string thread_first_str = "first thr.: ";
+string thread_second_str = "second thr.: ";
+
+struct PARAMS
+{
+	/*PARAMS(bool is_work_file, string path, string text)
+	{
+		this->is_work_file = is_work_file;
+		this->full_path_file = path;
+		this->text = text;
+	}*/
+	PARAMS()
+	{
+		this->is_work_file = false;
+		this->path = "";
+		this->text = "";
+		this->full_path_file = "";
+		this->thread;
+	}
+	bool is_work_file;
+	string path;
+	string full_path_file;
+	string text;
+	HANDLE thread;
+};
+
+WNDCLASS NewWindowClass(HINSTANCE hInst, LPCWSTR Name, WNDPROC Procedure)
+{
+	WNDCLASS _wc = { 0 };
+	_wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+	_wc.hInstance = hInst;
+	_wc.hIcon = LoadIcon(NULL, IDI_SHIELD);
+	_wc.lpszClassName = Name;
+	_wc.hbrBackground = reinterpret_cast<HBRUSH>(GetStockObject(COLOR_WINDOW));
+	_wc.lpfnWndProc = Procedure;
+	return _wc;
+}
+
+void output(const string& file, const string& thred) 
+{
+	WaitForSingleObject(hMutex, INFINITE);
+	SendDlgItemMessageA(MainWindow, LIST_OUTPUT, LB_ADDSTRING, 0, (LPARAM)((thred + file).c_str()));
+	ReleaseMutex(hMutex);
+}
+
+void work_with_file(void* parameter)
+{
+	WaitForSingleObject(hMutexWork, INFINITE);
+	PARAMS* params = (PARAMS*)parameter;
+	ifstream fin(params->full_path_file);
+	if (!fin.is_open())
+		return;
+	if (fin.peek() == EOF)
+		return;
+
+	string str, source{ "" };
+	while (getline(fin, str))
+		source += str;
+	size_t pos = source.find_first_of(params->text);
+	if (pos != string::npos)
+	{
+		params->is_work_file = true;
+		ShellExecuteA(NULL, "open", params->full_path_file.c_str(), NULL, NULL, SW_RESTORE);
+	}
+	fin.close();
+	ReleaseMutex(hMutex);
+	TerminateThread(params->thread, 0);
+}
+
+int getDepth()
+{
+	GetWindowTextA(hFileDepth, FileDepth, 100);
+	string str_file_depth = FileDepth;
+	if (str_file_depth.size() == 0)
+		return 0;
+	return stoi(str_file_depth);
+}
+
+int _getDepth()
+{
+	GetWindowTextA(_hFileDepth, _FileDepth, 100);
+	string str_file_depth = _FileDepth;
+	if (str_file_depth.size() == 0)
+		return 0;
+	return stoi(str_file_depth);
+}
+
+DWORD search_all()
+{
+	bool prov = false;
+	size_t counter = 0;
+	try
+	{
+		const int priority = SendMessage(hSearchPriority, CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
+		SetPriorityClass(thread_first, priority - 2);
+		GetWindowTextA(hFilePath, c_path, 256);
+		string path = c_path;
+		if (path.size() == 0)
+			output("Введите путь.", thread_first_str);
+		else
+		{
+			prov = true;
+			GetWindowTextA(hFileMask, c_file_mask, 50);
+			string regex_prov = c_file_mask;
+			regex reg(regex_prov);
+			int depth = getDepth();
+			if (depth == 0)
+			{
+				if (regex_prov.size() == 0)
+				{
+					for (const auto& file : filesystem::directory_iterator(path))
+					{
+						if (filesystem::is_directory(file))
+						{
+							counter++;
+							hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+							output("Каталог " + file.path().string(), thread_first_str);
+							this_thread::sleep_for(chrono::milliseconds(50));
+						}
+						else
+						{
+							counter++;
+							hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+							output(file.path().stem().string() + file.path().extension().string(), thread_first_str);
+							this_thread::sleep_for(chrono::milliseconds(50));
+						}
+					}
+				}
+				else
+				{
+					for (const auto& file : filesystem::directory_iterator(path))
+					{
+						if (regex_match(file.path().stem().string() + file.path().extension().string(), reg))
+						{
+							if (filesystem::is_directory(file))
+							{
+								counter++;
+								hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+								output("Каталог " + file.path().string(), thread_first_str);
+								this_thread::sleep_for(chrono::milliseconds(50));
+							}
+							else
+							{
+								counter++;
+								hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+								output(file.path().stem().string() + file.path().extension().string(), thread_first_str);
+								this_thread::sleep_for(chrono::milliseconds(50));
+							}
+						}
+					}
+				}
+			}
+			else
+			{
+				if (regex_prov.size() == 0)
+				{
+					for (auto file = filesystem::recursive_directory_iterator(path, filesystem::directory_options::skip_permission_denied); file != filesystem::recursive_directory_iterator(); file++)
+					{
+						if (file.depth() < depth) {
+							if (file->is_directory())
+							{
+								counter++;
+								hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+								output("Каталог " + file->path().string(), thread_first_str);
+								this_thread::sleep_for(chrono::milliseconds(50));
+							}
+							else
+							{
+								counter++;
+								output(file->path().stem().string() + file->path().extension().string(), thread_first_str);
+								this_thread::sleep_for(chrono::milliseconds(50));
+							}
+						}
+					}
+				}
+				else
+				{
+					for (auto file = filesystem::recursive_directory_iterator(path, filesystem::directory_options::skip_permission_denied); file != filesystem::recursive_directory_iterator(); file++)
+					{
+						if (file.depth() < depth && regex_match(file->path().stem().string() + file->path().extension().string(), reg))
+						{
+							if (file->is_directory())
+							{
+								counter++;
+								hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+								output("Каталог " + file->path().string(), thread_first_str);
+								this_thread::sleep_for(chrono::milliseconds(50));
+							}
+							else
+							{
+								counter++;
+								hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+								output(file->path().stem().string() + file->path().extension().string(), thread_first_str);
+								this_thread::sleep_for(chrono::milliseconds(50));
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	catch(...){}
+	if (counter == 0 && prov)
+		output("Файлов/каталогов не найдено.", thread_first_str);
+	ExitThread(0);
+}
+
+DWORD _search_all()
+{
+	bool prov = false;
+	size_t counter = 0;
+	try
+	{
+		const int priority = SendMessage(_hSearchPriority, CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
+		SetPriorityClass(thread_second, priority - 2);
+		GetWindowTextA(_hFilePath, _c_path, 256);
+		string path = _c_path;
+		if (path.size() == 0)
+			output("Введите путь.", thread_second_str);
+		else
+		{
+			prov = true;
+			GetWindowTextA(_hFileMask, _c_file_mask, 50);
+			string regex_prov = _c_file_mask;
+			regex reg(regex_prov);
+			int depth = _getDepth();
+			if (depth == 0)
+			{
+				if (regex_prov.size() == 0)
+				{
+					for (const auto& file : filesystem::directory_iterator(path))
+					{
+						if (filesystem::is_directory(file))
+						{
+							counter++;
+							hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+							output("Каталог " + file.path().string(), thread_second_str);
+							this_thread::sleep_for(chrono::milliseconds(50));
+						}
+						else
+						{
+							counter++;
+							hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+							output(file.path().stem().string() + file.path().extension().string(), thread_second_str);
+							this_thread::sleep_for(chrono::milliseconds(50));
+						}
+					}
+				}
+				else
+				{
+					for (const auto& file : filesystem::directory_iterator(path))
+					{
+						if (regex_match(file.path().stem().string() + file.path().extension().string(), reg))
+						{
+							if (filesystem::is_directory(file))
+							{
+								counter++;
+								hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+								output("Каталог " + file.path().string(), thread_second_str);
+								this_thread::sleep_for(chrono::milliseconds(50));
+							}
+							else
+							{
+								counter++;
+								hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+								output(file.path().stem().string() + file.path().extension().string(), thread_second_str);
+								this_thread::sleep_for(chrono::milliseconds(50));
+							}
+						}
+					}
+				}
+			}
+			else
+			{
+				if (regex_prov.size() == 0)
+				{
+					for (auto file = filesystem::recursive_directory_iterator(path, filesystem::directory_options::skip_permission_denied); file != filesystem::recursive_directory_iterator(); file++)
+					{
+						if (file.depth() < depth) {
+							if (file->is_directory())
+							{
+								counter++;
+								hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+								output("Каталог " + file->path().string(), thread_second_str);
+								this_thread::sleep_for(chrono::milliseconds(50));
+							}
+							else
+							{
+								counter++;
+								hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+								output(file->path().stem().string() + file->path().extension().string(), thread_second_str);
+								this_thread::sleep_for(chrono::milliseconds(50));
+							}
+						}
+					}
+				}
+				else
+				{
+					for (auto file = filesystem::recursive_directory_iterator(path, filesystem::directory_options::skip_permission_denied); file != filesystem::recursive_directory_iterator(); file++)
+					{
+						if (file.depth() < depth && regex_match(file->path().stem().string() + file->path().extension().string(), reg))
+						{
+							if (file->is_directory())
+							{
+								counter++;
+								hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+								output("Каталог " + file->path().string(), thread_second_str);
+								this_thread::sleep_for(chrono::milliseconds(50));
+							}
+							else
+							{
+								counter++;
+								hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+								output(file->path().stem().string() + file->path().extension().string(), thread_second_str);
+								this_thread::sleep_for(chrono::milliseconds(50));
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	catch (...) {}
+	if (counter == 0 && prov)
+		output("Файлов/каталогов не найдено.", thread_second_str);
+	ExitThread(0);
+}
+
+DWORD search_directories()
+{
+	bool prov = false;
+	size_t counter = 0;
+	try
+	{
+		const int priority = SendMessage(hSearchPriority, CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
+		SetPriorityClass(thread_first, priority - 2);
+		GetWindowTextA(hFilePath, c_path, 256);
+		string path = c_path;
+		if (path.size() == 0)
+			output("Введите путь.", thread_first_str);
+		else
+		{
+			prov = true;
+			GetWindowTextA(hFileMask, c_file_mask, 50);
+			string regex_prov = c_file_mask;
+			regex reg(regex_prov);
+			int depth = getDepth();
+			if (depth == 0)
+			{
+				if (regex_prov.size() == 0)
+				{
+					for (const auto& file : filesystem::directory_iterator(path))
+					{
+						if (filesystem::is_directory(file))
+						{
+							counter++;
+							hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+							output("Каталог " + file.path().string(), thread_first_str);
+							this_thread::sleep_for(chrono::milliseconds(50));
+						}
+					}
+				}
+				else
+				{
+					for (const auto& file : filesystem::directory_iterator(path))
+					{
+						if (regex_match(file.path().stem().string() + file.path().extension().string(), reg) && filesystem::is_directory(file))
+						{
+							counter++;
+							hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+							output("Каталог " + file.path().string(), thread_first_str);
+							this_thread::sleep_for(chrono::milliseconds(50));
+						}
+					}
+				}
+			}
+			else
+			{
+				if (regex_prov.size() == 0)
+				{
+					for (auto file = filesystem::recursive_directory_iterator(path, filesystem::directory_options::skip_permission_denied); file != filesystem::recursive_directory_iterator(); file++)
+					{
+						if (file.depth() < depth && file->is_directory())
+						{
+							counter++;
+							hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+							output("Каталог " + file->path().string(), thread_first_str);
+							this_thread::sleep_for(chrono::milliseconds(50));
+						}
+					}
+				}
+				else
+				{
+					for (auto file = filesystem::recursive_directory_iterator(path, filesystem::directory_options::skip_permission_denied); file != filesystem::recursive_directory_iterator(); file++)
+					{
+						if (file.depth() < depth && regex_match(file->path().stem().string() + file->path().extension().string(), reg) && file->is_directory())
+						{
+							counter++;
+							hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+							output("Каталог " + file->path().string(), thread_first_str);
+							this_thread::sleep_for(chrono::milliseconds(50));
+						}
+					}
+				}
+			}
+		}
+	}
+	catch (...) {}
+	if (counter == 0 && prov)
+		output("Каталогов не найдено.", thread_first_str);
+	ExitThread(0);
+}
+
+DWORD _search_directories()
+{
+	bool prov = false;
+	size_t counter = 0;
+	try
+	{
+		const int priority = SendMessage(_hSearchPriority, CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
+		SetPriorityClass(thread_second, priority - 2);
+		GetWindowTextA(_hFilePath, _c_path, 256);
+		string path = _c_path;
+		if (path.size() == 0)
+			output("Введите путь.", thread_second_str);
+		else
+		{
+			prov = true;
+			GetWindowTextA(_hFileMask, _c_file_mask, 50);
+			string regex_prov = _c_file_mask;
+			regex reg(regex_prov);
+			int depth = _getDepth();
+			if (depth == 0)
+			{
+				if (regex_prov.size() == 0)
+				{
+					for (const auto& file : filesystem::directory_iterator(path))
+					{
+						if (filesystem::is_directory(file))
+						{
+							counter++;
+							hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+							output("Каталог " + file.path().string(), thread_second_str);
+							this_thread::sleep_for(chrono::milliseconds(50));
+						}
+					}
+				}
+				else
+				{
+					for (const auto& file : filesystem::directory_iterator(path))
+					{
+						if (regex_match(file.path().stem().string() + file.path().extension().string(), reg) && filesystem::is_directory(file))
+						{
+							counter++;
+							hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+							output("Каталог " + file.path().string(), thread_second_str);
+							this_thread::sleep_for(chrono::milliseconds(50));
+						}
+					}
+				}
+			}
+			else
+			{
+				if (regex_prov.size() == 0)
+				{
+					for (auto file = filesystem::recursive_directory_iterator(path, filesystem::directory_options::skip_permission_denied); file != filesystem::recursive_directory_iterator(); file++)
+					{
+						if (file.depth() < depth && file->is_directory())
+						{
+							counter++;
+							hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+							output("Каталог " + file->path().string(), thread_second_str);
+							this_thread::sleep_for(chrono::milliseconds(50));
+						}
+					}
+				}
+				else
+				{
+					for (auto file = filesystem::recursive_directory_iterator(path, filesystem::directory_options::skip_permission_denied); file != filesystem::recursive_directory_iterator(); file++)
+					{
+						if (file.depth() < depth && regex_match(file->path().stem().string() + file->path().extension().string(), reg) && file->is_directory())
+						{
+							counter++;
+							hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+							output("Каталог " + file->path().string(), thread_second_str);
+							this_thread::sleep_for(chrono::milliseconds(50));
+						}
+					}
+				}
+			}
+		}
+	}
+	catch (...) {}
+	if (counter == 0 && prov)
+		output("Каталогов не найдено.", thread_second_str);
+	ExitThread(0);
+}
+
+DWORD search_file_with_text()
+{
+	PARAMS param;
+	bool prov = false;
+	size_t counter = 0;
+	try
+	{
+		const int priority = SendMessage(hSearchPriority, CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
+		SetPriorityClass(thread_first, priority - 2);
+		GetWindowTextA(hFilePath, c_path, 256);
+		GetWindowTextA(hTextForSearching, c_text_with_file, 256);
+		param.text = c_text_with_file;
+		param.path = c_path;
+		if (param.path.size() == 0)
+			output("Введите путь.", thread_first_str);
+		else if (param.text.size() == 0)
+			output("Введите текст, который нужно найти в файле.", thread_first_str);
+		else
+		{
+			prov = true;
+			GetWindowTextA(hFileMask, c_file_mask, 50);
+			string regex_prov = c_file_mask;
+			regex reg(regex_prov);
+			int depth = getDepth();
+			if (depth == 0)
+			{
+				if (regex_prov.size() == 0)
+				{
+					for (const auto& file : filesystem::directory_iterator(param.path))
+					{
+						if (filesystem::is_directory(file))
+						{
+							counter++;
+							hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+							output("Каталог " + file.path().string(), thread_first_str);
+							this_thread::sleep_for(chrono::milliseconds(50));
+						}
+						else
+						{
+							counter++;
+							output(file.path().stem().string() + file.path().extension().string(), thread_first_str);
+							if (file.path().extension().string() == ".txt" && !param.is_work_file)
+							{
+								hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+								hMutexWork = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexWork");
+								param.full_path_file = param.path + "\\" + file.path().stem().string() + file.path().extension().string();
+								param.thread = thread_open_file_first;
+								thread_open_file_first = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)work_with_file, &param, 0, NULL);
+							}
+							this_thread::sleep_for(chrono::milliseconds(50));
+						}
+					}
+				}
+				else
+				{
+					for (const auto& file : filesystem::directory_iterator(param.path))
+					{
+						if (regex_match(file.path().stem().string() + file.path().extension().string(), reg))
+						{
+							if (filesystem::is_directory(file))
+							{
+								counter++;
+								hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+								output("Каталог " + file.path().string(), thread_first_str);
+								this_thread::sleep_for(chrono::milliseconds(50));
+							}
+							else
+							{
+								counter++;
+								output(file.path().stem().string() + file.path().extension().string(), thread_first_str);
+								if (file.path().extension().string() == ".txt" && !param.is_work_file)
+								{
+									hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+									hMutexWork = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexWork");
+									param.full_path_file = param.path + "\\"+file.path().stem().string() + file.path().extension().string();
+									param.thread = thread_open_file_first;
+									thread_open_file_first = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)work_with_file, &param, 0, NULL);
+								}
+								this_thread::sleep_for(chrono::milliseconds(50));
+							}
+						}
+					}
+				}
+			}
+			else
+			{
+				if (regex_prov.size() == 0)
+				{
+					for (auto file = filesystem::recursive_directory_iterator(param.path, filesystem::directory_options::skip_permission_denied); file != filesystem::recursive_directory_iterator(); file++)
+					{
+						if (file.depth() < depth) {
+							if (file->is_directory())
+							{
+								counter++;
+								hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+								output("Каталог " + file->path().string(), thread_first_str);
+								this_thread::sleep_for(chrono::milliseconds(50));
+							}
+							else
+							{
+								counter++;
+								output(file->path().stem().string() + file->path().extension().string(), thread_first_str);
+								string type = file->path().extension().string();
+								if (type == ".txt" && !param.is_work_file)
+								{
+									hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+									hMutexWork = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexWork");
+									param.full_path_file = param.path + "\\" + file->path().stem().string() + file->path().extension().string();
+									param.thread = thread_open_file_first;
+									thread_open_file_first = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)work_with_file, &param, 0, NULL);
+								}
+								this_thread::sleep_for(chrono::milliseconds(50));
+							}
+						}
+					}
+				}
+				else
+				{
+					for (auto file = filesystem::recursive_directory_iterator(param.path, filesystem::directory_options::skip_permission_denied); file != filesystem::recursive_directory_iterator(); file++)
+					{
+						if (file.depth() < depth && regex_match(file->path().stem().string() + file->path().extension().string(), reg))
+						{
+							if (file->is_directory())
+							{
+								counter++;
+								hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+								output("Каталог " + file->path().string(), thread_first_str);
+								this_thread::sleep_for(chrono::milliseconds(50));
+							}
+							else
+							{
+								counter++;
+								output(file->path().stem().string() + file->path().extension().string(), thread_first_str);
+								if (file->path().extension().string() == ".txt" && !param.is_work_file)
+								{
+									hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+									hMutexWork = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexWork");
+									param.full_path_file = param.path + "\\" + file->path().stem().string() + file->path().extension().string();
+									param.thread = thread_open_file_first;
+									thread_open_file_first = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)work_with_file, &param, 0, NULL);
+								}
+								this_thread::sleep_for(chrono::milliseconds(50));
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	catch (...) {}
+	if (counter == 0 && prov)
+		output("Файла не найдено.", thread_first_str);
+	ExitThread(0);
+}
+
+DWORD _search_file_with_text()
+{
+	PARAMS param;
+	bool prov = false;
+	size_t counter = 0;
+	try
+	{
+		const int priority = SendMessage(_hSearchPriority, CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
+		SetPriorityClass(thread_second, priority - 2);
+		GetWindowTextA(_hFilePath, _c_path, 256);
+		GetWindowTextA(_hTextForSearching, _c_text_with_file, 256);
+		param.text = _c_text_with_file;
+		param.path = _c_path;
+		if (param.path.size() == 0)
+			output("Введите путь.", thread_second_str);
+		else if (param.text.size() == 0)
+			output("Введите текст, который нужно найти в файле.", thread_second_str);
+		else
+		{
+			prov = true;
+			GetWindowTextA(_hFileMask, _c_file_mask, 50);
+			string regex_prov = _c_file_mask;
+			regex reg(regex_prov);
+			int depth = getDepth();
+			if (depth == 0)
+			{
+				if (regex_prov.size() == 0)
+				{
+					for (const auto& file : filesystem::directory_iterator(param.path))
+					{
+						if (filesystem::is_directory(file))
+						{
+							counter++;
+							hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+							output("Каталог " + file.path().string(), thread_second_str);
+							this_thread::sleep_for(chrono::milliseconds(50));
+						}
+						else
+						{
+							counter++;
+							output(file.path().stem().string() + file.path().extension().string(), thread_second_str);
+							if (file.path().extension().string() == ".txt" && !param.is_work_file)
+							{
+								hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+								hMutexWork = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexWork");
+								param.full_path_file = param.path + "\\" + file.path().stem().string() + file.path().extension().string();
+								param.thread = thread_open_file_second;
+								thread_open_file_second = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)work_with_file, &param, 0, NULL);
+							}
+							this_thread::sleep_for(chrono::milliseconds(50));
+						}
+					}
+				}
+				else
+				{
+					for (const auto& file : filesystem::directory_iterator(param.path))
+					{
+						if (regex_match(file.path().stem().string() + file.path().extension().string(), reg))
+						{
+							if (filesystem::is_directory(file))
+							{
+								counter++;
+								hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+								output("Каталог " + file.path().string(), thread_second_str);
+								this_thread::sleep_for(chrono::milliseconds(50));
+							}
+							else
+							{
+								counter++;
+								output(file.path().stem().string() + file.path().extension().string(), thread_second_str);
+								if (file.path().extension().string() == ".txt" && !param.is_work_file)
+								{
+									hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+									hMutexWork = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexWork");
+									param.full_path_file = param.path + "\\" + file.path().stem().string() + file.path().extension().string();
+									param.thread = thread_open_file_second;
+									thread_open_file_second = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)work_with_file, &param, 0, NULL);
+								}
+								this_thread::sleep_for(chrono::milliseconds(50));
+							}
+						}
+					}
+				}
+			}
+			else
+			{
+				if (regex_prov.size() == 0)
+				{
+					for (auto file = filesystem::recursive_directory_iterator(param.path, filesystem::directory_options::skip_permission_denied); file != filesystem::recursive_directory_iterator(); file++)
+					{
+						if (file.depth() < depth) {
+							if (file->is_directory())
+							{
+								hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+								counter++;
+								output("Каталог " + file->path().string(), thread_second_str);
+								this_thread::sleep_for(chrono::milliseconds(50));
+							}
+							else
+							{
+								counter++;
+								output(file->path().stem().string() + file->path().extension().string(), thread_second_str);
+								string type = file->path().extension().string();
+								if (type == ".txt" && !param.is_work_file)
+								{
+									hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+									hMutexWork = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexWork");
+									param.full_path_file = param.path + "\\" + file->path().stem().string() + file->path().extension().string();
+									param.thread = thread_open_file_second;
+									thread_open_file_second = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)work_with_file, &param, 0, NULL);
+								}
+								this_thread::sleep_for(chrono::milliseconds(50));
+							}
+						}
+					}
+				}
+				else
+				{
+					for (auto file = filesystem::recursive_directory_iterator(param.path, filesystem::directory_options::skip_permission_denied); file != filesystem::recursive_directory_iterator(); file++)
+					{
+						if (file.depth() < depth && regex_match(file->path().stem().string() + file->path().extension().string(), reg))
+						{
+							if (file->is_directory())
+							{
+								counter++;
+								hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+								output("Каталог " + file->path().string(), thread_second_str);
+								this_thread::sleep_for(chrono::milliseconds(50));
+							}
+							else
+							{
+								counter++;
+								output(file->path().stem().string() + file->path().extension().string(), thread_second_str);
+								if (file->path().extension().string() == ".txt" && !param.is_work_file)
+								{
+									hMutex = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexOutput");
+									hMutexWork = CreateMutex(NULL, FALSE, (LPCWSTR)"MutexWork");
+									param.full_path_file = param.path + "\\" + file->path().stem().string() + file->path().extension().string();
+									param.thread = thread_open_file_second;
+									thread_open_file_second = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)work_with_file, &param, 0, NULL);
+								}
+								this_thread::sleep_for(chrono::milliseconds(50));
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	catch (...) {}
+	if (counter == 0 && prov)
+		output("Файла не найдено.", thread_second_str);
+	ExitThread(0);
+}

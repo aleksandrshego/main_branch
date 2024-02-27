@@ -1,0 +1,458 @@
+#include "Book.h"
+#include <fstream>
+#include <algorithm>
+#include <Windows.h>
+#include <conio.h>
+
+#define sys system("pause"); system("cls")
+#define cls system("cls")
+#define pause system("pause")
+#define line cout << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
+
+void prov(ifstream& fin)
+{
+	if (!fin.is_open())
+		throw exception("Ошибка открытия файла.");
+	if (fin.peek() == EOF)
+		throw exception("Файл пуст.");
+}
+
+void filling_list(list<Book>& lib, string& str)
+{
+	if (!str.empty() && str[0] != ' ')
+	{
+		str += " ";
+		Book book;
+		list<Author> authors;
+		book.SetUDK(stoi(str.substr(0, str.find_first_of(";"))));
+		str.erase(0, str.find_first_of(";") + 2);
+		book.SetTitle(str.substr(0, str.find_first_of(";")));
+		str.erase(0, str.find_first_of(";") + 2);
+		book.SetYear(stoi(str.substr(0, str.find_first_of(";"))));
+		str.erase(0, str.find_first_of(";") + 2);
+		do 
+		{
+			Author author;
+			author.SetSurname(str.substr(0, str.find_first_of(" ")));
+			str.erase(0, str.find_first_of(" ") + 1);
+			author.SetName(str.substr(0, str.find_first_of(" ")));
+			str.erase(0, str.find_first_of(" ") + 1);
+			short int pos = str.find_first_of(" ;");
+			author.SetPatronymic(str.substr(0, pos));
+			if (str[pos] == ';')
+				str.erase(0, pos + 2);
+			else
+				str.erase(0, pos + 1);
+			authors.push_back(author);
+		} while (!str.empty());
+		authors.sort([](const Author& a, const Author& b){ return a < b;});
+		book.SetAuthors(authors);
+		lib.push_back(book);
+	}
+	lib.sort([](const Book& a, const Book& b) { return a < b; });
+}
+
+void print(const list<Book>& lib)
+{
+	if (lib.size() == 0)
+		cout << "Библиотека пуста\n";
+	else
+		for (auto it = lib.begin(); it != lib.end(); ++it)
+			cout << *it << "\n";
+}
+
+void read_file(list<Book>& lib)
+{
+	try
+	{
+		ifstream fin("input.txt");
+		prov(fin);
+
+		string str;
+		while (getline(fin, str))
+			filling_list(lib, str);
+
+		fin.close();
+	}
+	catch(exception& ex)
+	{
+		cout << ex.what() << "\n";
+	}
+}
+
+bool checker(const list<Author>& authors, const Author& a)
+{
+	for (auto it = authors.begin(); it != authors.end(); ++it)
+	{
+		if (*it == a)
+			return true;
+	}
+	return false;
+}
+
+bool checker(const list<Book>& lib, const Book& a)
+{
+	for (auto it = lib.begin(); it != lib.end(); ++it)
+	{
+		if (*it == a)
+			return true;
+	}
+	return false;
+}
+
+bool add_author(list<Author>& authors)
+{
+	Author author;
+	cout << "Введите фамилию автора: "; string surname; cin >> surname;
+	cout << "Введите имя автора: "; string name; cin >> name;
+	cout << "Введите отчество автора: "; string patronymic; cin >> patronymic;
+	cin.ignore(32767, '\n');
+	author.SetName(name);
+	author.SetSurname(surname);
+	author.SetPatronymic(patronymic);
+
+	if (checker(authors, author))
+	{
+		line;
+		cout << "Такой автор уже есть.";
+		line;
+		return false;
+	}
+	else
+	{
+		authors.push_back(author);
+		authors.sort([](const Author& a, const Author& b) { return a < b; });
+		return true;
+	}
+}
+
+void choice_added(list<Author>& authors)
+{
+	cout << "|| Желаете продолжить ввод авторов? ||\n";
+	cout << "|| 1. Да                            ||\n";
+	cout << "|| 2. Нет                           ||\n";
+	switch (_getch())
+	{
+	case '1':
+	{
+		cls;
+		add_author(authors);
+		choice_added(authors);
+		break;
+	}
+	case '2':
+	{
+		cls;
+		break;
+	}
+	default:
+	{
+		cout << "Ошибка, повторите ещё раз.\n";
+		sys;
+		choice_added(authors);
+	}
+	}
+}
+
+void add_book(list<Book>& lib)
+{
+	cout << "Введите УДК: "; int udk; cin >> udk;
+	cin.ignore(32767, '\n');
+	bool check = false;
+	while (cin.fail() || udk < 1)
+	{
+		cin.clear();
+		cout << "Ошибка. Введите ещё раз: ";
+		cin.ignore(32767, '\n');
+		cin >> udk;
+		if(check)
+			cin.ignore(32767, '\n');
+		check = true;
+	}
+	cout << "Введите название книги: "; string title; getline(cin, title);
+	cout << "Введите год издания: "; int year; cin >> year;
+	cin.ignore(32767, '\n');
+	while (cin.fail())
+	{
+		cin.clear();
+		cout << "Ошибка. Введите ещё раз: ";
+		cin.ignore(32767, '\n');
+		cin >> udk;
+		cin.ignore(32767, '\n');
+	}
+	list<Author> authors;
+	add_author(authors);
+	cls;
+	choice_added(authors);
+	Book book (udk, authors, title, year);
+	if (checker(lib, book))
+	{
+		line;
+		cout << "Такая книга уже есть.";
+		line;
+		pause;
+	}
+	else
+	{
+		lib.push_back(Book{ udk, authors, title, year });
+		lib.sort([](const Book& a, const Book& b) { return a < b; });
+		line;
+		cout << "Книга под названием \"" << title << "\" добавлена в библиотеку.\n";
+		line;
+		pause;
+	}
+}
+
+void delete_book(list<Book>& lib)
+{
+	bool prov = false;
+	cout << "Введите название книги: "; string title; getline(cin, title);
+	for (auto it = lib.begin(); it != lib.end();)
+	{
+		if (it->GetTitle() == title)
+		{
+			lib.erase(it);
+			prov = true;
+			break;
+		}
+		else
+			++it;
+	}
+	if (prov)
+	{
+		cls;
+		line;
+		cout << "Книга под названием \"" << title << "\" удалена.";
+		line;
+	}
+	else
+	{
+		cls;
+		line;
+		cout << "Книги под названием \"" << title << "\" в библиотеке не нашлось.";
+		line;
+	}
+}
+
+void find_book_by_title(const list<Book>& lib)
+{
+	bool prov = false;
+	cout << "Введите название книги: "; string title; getline(cin, title);
+	for (auto it = lib.begin(); it != lib.end(); ++it)
+	{
+		if (it->GetTitle() == title)
+		{
+			prov = true;
+			cout << "\n" << *it;
+			break;
+		}
+	}
+	if (!prov)
+	{
+		cls;
+		line;
+		cout << "Книги под названием \"" << title << "\" в библиотеке не нашлось.";
+		line;
+	}
+}
+
+void find_book_by_author(const list<Book>& lib)
+{
+	bool prov = false;
+	cout << "Введите фамилию автора: "; string surname; cin >> surname;
+	cout << "Введите имя автора: "; string name; cin >> name;
+	cout << "Введите отчество автора: "; string patronymic; cin >> patronymic;
+	cin.ignore(32767, '\n');
+	cls;
+	for (auto it = lib.begin(); it != lib.end(); ++it)
+	{
+		list<Author> temp; it->GetAuthors(temp);
+		for (auto au = temp.begin(); au != temp.end(); ++au)
+			if (au->GetName() == name && au->GetPatronymic() == patronymic && au->GetSurname() == surname)
+			{
+				cout << *it << "\n";
+				prov = true;
+				break;
+			}
+	}
+	if (!prov)
+	{
+		cls;
+		line;
+		cout << "Книг с указанным автором в библиотеке не нашлось.";
+		line;
+	}
+}
+
+void five_task(list<Book>& lib)
+{
+	bool prov = false;
+	cout << "Введите название книги: "; string title; getline(cin, title);
+	for (auto it = lib.begin(); it != lib.end(); ++it)
+	{
+		if (it->GetTitle() == title)
+		{
+			list<Author> temp; it->GetAuthors(temp);
+			if (add_author(temp))
+			{
+				cls;
+				line;
+				cout << "Добавлен ещё один автор.";
+				line;
+				it->SetAuthors(temp);
+				cout << "Ниже новая информация о книге.\n" << *it << "\n";
+			}
+				prov = true;
+		}
+	}
+	if (!prov)
+	{
+		cls;
+		line;
+		cout << "Книги под названием \"" << title << "\" в библиотеке не нашлось.";
+		line;
+	}
+}
+
+void six_task(list<Book>& lib)
+{
+	bool prov_title = false;
+	bool prov_author = false;
+	cout << "Введите название книги: "; string title; getline(cin, title);
+	for (auto it = lib.begin(); it != lib.end(); ++it)
+	{
+		if (it->GetTitle() == title)
+		{
+			prov_title = true;
+			cout << "Введите фамилию автора: "; string surname; cin >> surname;
+			cout << "Введите имя автора: "; string name; cin >> name;
+			cout << "Введите отчество автора: "; string patronymic; cin >> patronymic;
+			cin.ignore(32767, '\n');
+			list<Author> temp; it->GetAuthors(temp);
+			for (auto au = temp.begin(); au != temp.end(); ++au)
+				if (au->GetName() == name && au->GetPatronymic() == patronymic && au->GetSurname() == surname)
+				{
+					prov_author = true;
+					temp.erase(au);
+					it->SetAuthors(temp);
+					cls;
+					line;
+					cout << "Указанный автор удалён.\n";
+					line;
+					cout << "Ниже новая информация о книге.\n" << *it << "\n";
+					break;
+				}
+		}
+	}
+	if (!prov_title)
+	{
+		cls;
+		line;
+		cout << "Книги под названием \"" << title << "\" в библиотеке не нашлось.";
+		line;
+	}
+	else if (!prov_author)
+	{
+		cls;
+		line;
+		cout << "Указанного автора в книге не нашлось.";
+		line;
+	}
+}
+
+void menu(list<Book>& lib)
+{
+	cout << "|| Выберите один из предложенных вариантов ||\n";
+	cout << "|| 1. Добавить книгу                       ||\n";
+	cout << "|| 2. Удалить книгу                        ||\n";
+	cout << "|| 3. Найти книгу по названию              ||\n";
+	cout << "|| 4. Найти книгу по автору                ||\n";
+	cout << "|| 5. Добавить автора в книгу              ||\n";
+	cout << "|| 6. Удалить автора из книги              ||\n";
+	cout << "|| 7. Вывести набор книг всей библиотеки   ||\n";
+	cout << "|| 8. Выход                                ||\n";
+	switch (_getch())
+	{
+	case '1':
+	{
+		cls;
+		add_book(lib);
+		cls;
+		menu(lib);
+		break;
+	}
+	case '2':
+	{
+		cls;
+		delete_book(lib);
+		sys;
+		menu(lib);
+		break;
+	}
+	case '3':
+	{
+		cls;
+		find_book_by_title(lib);
+		sys;
+		menu(lib);
+		break;
+	}
+	case '4':
+	{
+		cls;
+		find_book_by_author(lib);
+		sys;
+		menu(lib);
+		break;
+	}
+	case '5':
+	{
+		cls;
+		five_task(lib);
+		sys;
+		menu(lib);
+		break;
+	}
+	case '6':
+	{
+		cls;
+		six_task(lib);
+		sys;
+		menu(lib);
+		break;
+	}
+	case '7':
+	{
+		cls;
+		print(lib);
+		sys;
+		menu(lib);
+		break;
+	}
+	case '8':
+	{
+		cls;
+		cout << "Конец\n";
+		break;
+	}
+	default:
+	{
+		cout << "Ошибка, повторите ещё раз.\n";
+		sys;
+		menu(lib);
+	}
+	}
+}
+
+int main()
+{
+	setlocale(0, "rus");
+	SetConsoleCP(1251);
+	SetConsoleOutputCP(1251);
+
+	list<Book> library;
+	read_file(library);
+	menu(library);
+
+	return 0;
+}

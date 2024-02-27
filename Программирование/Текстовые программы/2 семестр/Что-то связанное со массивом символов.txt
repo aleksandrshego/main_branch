@@ -1,0 +1,67 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <iostream>
+#include <cstring>
+
+
+using namespace std;
+
+char* FillMaxWord(char* s, const char* del)
+{
+	char* word = strtok(s, del);
+	char* max_w = word;
+
+	while (word != NULL)
+	{
+		if (strlen(max_w) <= strlen(word))
+			max_w = word;
+		word = strtok(NULL, del);
+	}
+
+	return max_w;
+}
+
+char* FillMinWord(char* s, const char* del)
+{
+	char* word = strtok(s, del);
+	char* min_w = word;
+
+	while (word != NULL)
+	{
+		if (strlen(min_w) >= strlen(word))
+			min_w = word;
+		word = strtok(NULL, del);
+	}
+
+	return min_w;
+}
+
+int main()
+{
+	char str[256], str_copy[256];
+	cin.getline(str, 256);
+
+	char delim[] = " ,.-";
+
+	strcpy(str_copy, str);
+
+	char* max_word = FillMaxWord(str, delim);
+	int maxLength = strlen(max_word);
+	cout << max_word << " size - " << maxLength << "\n";
+	strcpy(str, str_copy);
+
+	char* min_word = FillMinWord(str, delim);
+	int minLength = strlen(min_word);
+	cout << min_word << " size - " << minLength << "\n";
+	strcpy(str, str_copy);
+
+	char* maxWord = new char[maxLength + 1];
+	for (int i = 0; i < maxLength - 1 ; i++)
+	{
+		maxWord[i] = max_word[i];
+		if (i == maxLength - 2)
+			maxWord[i + 1] = '\0';
+	}
+
+	cout << maxWord << "\n" << max_word;
+	return 0;
+}

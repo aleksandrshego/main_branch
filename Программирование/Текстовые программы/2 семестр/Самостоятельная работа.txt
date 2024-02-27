@@ -1,0 +1,183 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <iostream>
+#include <cstring>
+#include <iomanip>
+#include <Windows.h>
+#include <vector>
+
+using namespace std;
+
+void input_text(char* s)
+{
+	cout << "Input the text:\n";
+	cin.getline(s, 256);
+}
+
+int sum_digitls(char* s)
+{
+	char str_copy[300];
+	strcpy(str_copy, s);
+	
+	char* word = strtok(s, " ,./;)(");
+	int sum = 0; 
+	bool minus = false;
+
+	while (word != NULL)
+	{
+		int num = 0; // здесь была некоторая ошибка, то есть у меня num не изменялся, следовательно, когда не было цифры, число всё равно прибавлялось
+		for (int i = 0; i < strlen(word); i++)
+		{
+
+			if (word[i] == '-')
+				minus = true;
+			if (isdigit(word[i]))
+			{
+				num = atoi(&word[i]);
+				break;
+			}
+		}
+		if (minus)
+		{
+			num *= (-1);
+			minus = false;
+		}
+		sum += num;
+		word = strtok(NULL, " ,./;)(");
+	}
+
+	strcpy(s, str_copy);
+
+	return sum;
+}
+
+void find_root(char* s)
+{
+	char root[30];
+	cout << "\n\nInput word-root: ";
+	cin >> root;
+	char str_copy[300];
+	strcpy(str_copy, s);
+
+	cout << "\nWords with root \"" << root << "\":\n";
+	char* word = strtok(s, " ,./;)(-");
+	
+
+	while (word != NULL)
+	{
+		if ((strstr(word, root) - word) >= 0)
+		{
+			cout << word << " ";
+		}
+		word = strtok(NULL, " ,./;)(-");
+	}
+	strcpy(s, str_copy);
+}
+
+//void sort_words(char* s)
+//{
+//	char str_copy[300];
+//	strcpy(str_copy, s);
+//
+//	char* word = strtok(s, " ,./;)(-");
+//
+//	while (word != NULL)
+//	{
+//		word = strtok(NULL, " ,./;)(-");
+//	}
+//}
+
+int find_space(char* s)
+{
+	int index = 0;
+	for (int i = 0; i < strlen(s); i++)
+		if (isspace(s[i]))
+			index++;
+	return index;
+}
+
+int find_word_upper(char* s)
+{
+	int index = 0;
+
+	char str_copy[300];
+	strcpy(str_copy, s);
+
+	char* word = strtok(s, " ,./;)(-");
+
+	while (word != NULL)
+	{
+		if (isupper(word[0]))
+			index++;
+		word = strtok(NULL, " ,./;)(-");
+	}
+	strcpy(s, str_copy);
+
+	return index;
+}
+
+void input_strings_for_end() // не работает
+{	
+	vector <char*> strings;
+	char str[256];
+	cout << "\nInput strings:\n";
+
+	do 
+	{
+		cin.getline(str, 256);
+		strings.push_back(str);
+	} while (str[0] != ' ' && strlen(str) != 1);
+
+	cout << "Strings:\n";
+	for (auto k : strings)
+	{
+		cout << k << "\n";
+	}
+}
+
+void replacing(char* s)
+{
+	bool prov = false;
+	for (int i = 0; i < strlen(s); i++)
+	{
+		if (s[i] == '*')
+		{
+			s[i] = '#';
+			prov = true;
+		}
+	}
+	if (!prov)
+		cout << "There was no replacement, since there are no asterisks.\n";
+	else
+		cout << "A replacement has occurred:\n" << s;
+}
+
+int main()
+{
+	char str[300];
+	input_text(str);
+	cout << "\nSumma digitls = " << sum_digitls(str);
+	find_root(str);
+	cout << "\n\nNumber of spaces: " << find_space(str);
+	cout << "\nNumber of upper words: " << find_word_upper(str);
+	cout << "\nNumber of symbols: " << strlen(str);
+	input_strings_for_end();
+	replacing(str);
+}
+
+
+
+
+//
+//bool Greater(const Words& a, const Words& b)
+//{
+//	if (a.freq == b.freq)
+//		return a.word < b.word;
+//
+//	return a.freq > b.freq;
+//}
+//
+//void sort_cust(char** arr, const int& n, const int& l, vector <Words>& count)
+//{
+//	completion(arr, n, l, count);
+//	sort(count.begin(), count.end(), Greater);
+//}

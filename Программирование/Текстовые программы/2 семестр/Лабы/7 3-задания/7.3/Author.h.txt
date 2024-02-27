@@ -1,0 +1,29 @@
+#pragma once
+#include <iostream>
+#include <string>
+#include <list>
+
+using namespace std;
+
+class Author
+{
+private:
+	string name, surname, patronymic;
+public:
+	Author() : name(" "), surname(" "), patronymic(" ") {} // конструктор по умолчанию
+
+	string GetName() const { return name; }
+	string GetSurname() const { return surname; }
+	string GetPatronymic() const { return patronymic; }
+
+	void SetName(const string& name) { this->name = name; }
+	void SetSurname(const string& surname) { this->surname = surname; }
+	void SetPatronymic(const string& patronymic) { this->patronymic = patronymic; }
+
+	bool operator < (const Author& a) const;
+	bool operator > (const Author& a) const;
+	bool operator == (const Author& a) const;
+
+	friend ostream& operator << (ostream& out, const Author& a);
+};
+

@@ -1,0 +1,65 @@
+#include <iostream>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+//struct Route {
+//public: // публичная секция
+//
+//	string GetSourse() { return source; }
+//	string GetDestination() { return destination; }
+//	int GetLenght() { return length; }
+//
+//private: // приватная секция 
+//
+//	string source = "Null";
+//	string destination = "Kell";
+//	int length = 0;
+//
+//};
+
+class Route { // class вместо struct
+public: // публичная секция
+
+	string GetSourse() { return source; }
+	string GetDestination() { return destination; }
+	int GetLenght() { return length; }
+
+	void SetSource(const string& new_source) {
+		source = new_source;
+		UpdateLength();
+	}
+	void SetDestrination(const string& new_destination) {
+		destination = new_destination;
+		UpdateLength();
+	}
+	
+
+private: // приватная секция 
+	void UpdateLength() {
+		length = ComputerDistance(source, destination);
+	}
+	int ComputerDistance(const string& s, const string& d) {
+		return s.length() - d.length();
+	}
+
+	string source;
+	string destination;
+	int length;
+
+}; // формально ничего не изменилось
+
+int main()
+{
+	Route k;
+	cout << k.GetSourse()[0]; // таким образом мы выводим первый символ нашего источника (source)
+	int length_source = k.GetSourse().length(); // находим длину строки source
+
+	return 0;
+}
+
+//string GetPositivity(int x) {
+//	return x > 0 ? "positive"
+//		: (x == 0 ? "zero" : "negative");
+//}

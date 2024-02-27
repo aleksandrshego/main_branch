@@ -1,0 +1,140 @@
+#include <iostream>
+#include <vector>
+#include <Windows.h>
+#include <iomanip>
+#include <algorithm>
+
+void input_diapazon(int& a, int& b)
+{
+	std::cout << "Введите диапазон: ";
+	std::cin >> a >> b;
+	if (a > b)
+		std::swap(a, b);
+}
+
+int input_size()
+{
+	std::cout << "Введите размерность: ";
+	int size;
+	do {
+		 std::cin >> size;
+		 if (size <= 0)
+			std::cout << "Ошибка, введите ещё раз: ";
+	} while (size <= 0);	
+	return size;
+}
+
+void filling_matrix(std::vector<std::vector<int>>& mtr)
+{
+	int a, b, size = input_size();
+	mtr.resize(size);
+	input_diapazon(a, b);
+	srand(time(NULL));
+	int value = 0;
+	for (std::vector<std::vector<int>>::iterator it = mtr.begin(); it != mtr.end(); ++it)
+		for (int i = 0; i < size; ++i)
+		{
+			if (a == b)
+				value = a;
+			else
+				value = rand() % (b - a) + 1 + a;
+			it->push_back(value);
+		}
+	system("cls");
+}
+
+void print_matrix(std::vector<std::vector<int>>& mtr)
+{
+	for (std::vector<std::vector<int>>::iterator it = mtr.begin(); it != mtr.end(); ++it)
+	{
+		for (std::vector<int>::iterator it_in = it->begin(); it_in != it->end(); ++it_in)
+			std::cout << std::setw(4) << *it_in << " ";
+		std::cout << "\n";
+	}
+}
+
+int find_max(std::vector<std::vector<int>>& mtr)
+{
+	auto it_beg = mtr.begin(); auto it_in_beg = it_beg->begin();
+	int max_value = *it_in_beg; // также можно сохранить итератор, чтобы потом просто удалить данный элемент и всю строку
+	for (auto iterator = mtr.begin(); iterator != mtr.end(); ++iterator)
+		for (auto iterator_in = iterator->begin(); iterator_in != iterator->end(); ++iterator_in)
+			if (max_value < *iterator_in)
+				max_value = *iterator_in;
+	return max_value;
+}
+
+void delete_element(const int& max_elem, std::vector<std::vector<int>>& mtr)
+{
+	bool prov = false;
+	int iter_column;
+	int iter_rows;
+	for (auto it = mtr.begin(); it != mtr.end(); ++it)
+	{
+		for (auto it_in = it->begin(); it_in != it->end(); ++it_in)
+			if (*it_in == max_elem)
+			{
+				iter_column = it_in - it->begin();
+				iter_rows = it - mtr.begin();
+				prov = true;
+				break;
+			}
+		if (prov) break;
+	}
+	
+	for (auto it = mtr.begin(); it != mtr.end(); ++it)
+		it->erase(it->begin() + iter_column);
+	mtr.erase(mtr.begin() + iter_rows);
+}
+
+void delete_max_element(std::vector<std::vector<int>>& mtr)
+{
+	int max_element = find_max(mtr);
+	delete_element(max_element, mtr);
+	std::cout << "Столбец и строка с максимальным элементом - " << max_element << " удалёна.\n";
+	print_matrix(mtr);
+}
+
+void sorting_matrix(std::vector<std::vector<int>>& mtr)
+{
+	int sum_now, sum_next, temp;
+	bool prov = false;
+
+	do {
+		prov = false; // чтобы у нас работал цикл, ибо если будет постоянно true, то будет бесконечный цикл
+		for (int i = 0; i < mtr.size() - 1; ++i)
+		{
+			sum_now = sum_next = 0;
+			for (int j = 0; j < mtr[i].size(); ++j) // mtr[i].size() - считается за размерность колонок
+			{
+				sum_now += mtr[i][j];
+				sum_next += mtr[i + 1][j];
+			}
+
+			if (sum_now > sum_next)
+			{
+				prov = true;
+				for (int j = 0; j < mtr[i].size(); ++j)
+					std::swap(mtr[i][j], mtr[i + 1][j]);
+			}
+		}
+	} while (prov);
+}
+
+int main()
+{
+	SetConsoleCP(1251);
+	SetConsoleOutputCP(1251);
+
+	std::vector<std::vector<int>> matrix;
+	filling_matrix(matrix);
+	std::cout << "Матрица с размерностью " << matrix.size() << ".\n";
+	print_matrix(matrix);
+	std::cout << "\n";
+	delete_max_element(matrix);
+	system("pause"); system("cls");
+	sorting_matrix(matrix);
+	std::cout << "Отсортированая матрица по сумме строки:\n";
+	print_matrix(matrix);
+	return 0;
+}

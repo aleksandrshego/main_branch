@@ -1,0 +1,107 @@
+#include <iostream>
+#include <string>
+#include <cmath>
+#include <windows.h>
+
+using namespace std;
+
+int main()
+{
+	string str, text;
+	int line_size, size_text;
+	double numbers;
+	text = "Enter the text: ";
+	size_text = text.length();
+	for (int i = 0; i < size_text; i++)
+	{
+		Sleep(10);
+		cout << text[i];
+	}
+	text = "";
+	getline(cin, str);
+	line_size = str.length();
+	cout << "\n";
+	text = "Source text: ";
+	size_text = text.length();
+	for (int i = 0; i < size_text; i++)
+	{
+		Sleep(10);
+		cout << text[i];
+	}
+	text = "";
+	for (int i = 0; i < line_size; i++)
+		if (str[i] == ' ')
+			str[i] = '_';
+	for (int i = 0; i < line_size; i++)
+	{
+		Sleep(20);
+		cout << str[i] << " ";
+	}
+	numbers = ceil(sqrt(line_size));
+	/*if (pow((int)numbers, 2) < line_size)
+		while (pow((int)numbers, 2) < line_size)
+			numbers += 1;*/
+	while (line_size < pow(numbers, 2))
+	{
+		str += '*';
+		line_size++;
+	}
+	Sleep(200);
+	cout << "\n";
+	text = "Changed text for the matrix: ";
+	size_text = text.length();
+	for (int i = 0; i < size_text; i++)
+	{
+		Sleep(10);
+		cout << text[i];
+	}
+	text = "";
+	for (int i = 0; i < line_size; i++)
+	{
+		Sleep(20);
+		cout << str[i] << " ";
+	}
+	cout << "\n\n";
+
+	//ВВОД МАТРИЦЫ 
+	int rowns, columns, k = 0;
+	rowns = columns = numbers;
+	char** mtr = new char* [rowns];
+	for (int i = 0; i < rowns; i++)
+		mtr[i] = new char[columns];
+
+	for (int i = 0; i < rowns; i++)
+	{
+		for (int j = 0; j < columns; j++)
+		{
+			Sleep(20);
+			mtr[i][j] = str[k];
+			cout << mtr[i][j] << '\t';
+			k++;
+		}
+		cout << '\n';
+	}
+	cout << "\n";
+	text = "Encrypted text: ";
+	size_text = text.length();
+	for (int i = 0; i < size_text; i++)
+	{
+		Sleep(10);
+		cout << text[i];
+	}
+	text = "";
+	for (int j = 0; j < columns; j++)
+	{
+		for (int i = 0; i < rowns; i++)
+		{
+			Sleep(20);
+			cout << mtr[i][j];
+		}
+	}
+	cout << "\n";
+	for (int i = 0; i < rowns; i++)
+		delete[] mtr[i];
+	delete[] mtr;
+	system("pause");
+	return 0;
+}

@@ -1,0 +1,48 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+bool IsPalindrom(string x)
+{
+	string prov;
+	prov = x;
+	reverse(prov.begin(), prov.end());
+	if (prov == x)
+		return true;
+	else
+		return false;
+}
+
+vector<string> PalindromFilter(vector<string> words, int minLength) // почему вектор? Потому что выводит через цикл for слова, ну а просто строку здесь не выводит
+{
+	vector<string> Output;
+	for (auto i : words)
+		if (IsPalindrom(i) == 1 && i.length() >= minLength)
+		{
+			Output.push_back(i);
+		}
+	return Output;
+}
+
+int main()
+{
+	vector<string> words = { "weew", "aba", "abacaba" };
+	int minLength = 0;
+	int step = 0;
+	cin >> minLength;
+	
+	for (auto i : PalindromFilter(words, minLength))
+	{
+		if (step > 0)
+		{
+			cout << ", " << i;
+		}
+		else
+			cout << i;
+		step++;
+	}
+	return 0;
+}

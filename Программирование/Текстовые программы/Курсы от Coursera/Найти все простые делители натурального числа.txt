@@ -1,0 +1,19 @@
+#include <iostream>
+using namespace std;
+int main()
+{
+	setlocale(LC_ALL, "rus");
+	int i{ 2 }, n;
+	cout << "Введите число n: "; cin >> n;
+	cout << "Все делители числа " << n << ": ";
+	while (i <= n) {
+		if (n % i == 0) {
+			cout << i << ' ';
+			n = n / i;
+		}
+		else {
+			i++;
+		}
+	}
+	return 0;
+}

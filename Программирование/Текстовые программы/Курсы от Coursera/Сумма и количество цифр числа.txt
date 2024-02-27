@@ -1,0 +1,23 @@
+#include <iostream>
+using namespace std;
+int main()
+{
+	setlocale(LC_ALL, "rus");
+	int number, sum = 0, k = 0;
+	cout << "\nВведите натуральное число: ";
+	cin >> number;
+	if (number <= 0)
+	{
+		cout << "Число не натуральное\n";
+		return 0;
+	}
+	while (number != 0)
+	{
+		k++;
+		sum += number % 10;
+		number /= 10;
+	}
+	cout << "\nСумма цифр числа = " << sum << endl;
+	cout << "Кол-во цифр числа = " << k << endl;
+	return 0;
+}

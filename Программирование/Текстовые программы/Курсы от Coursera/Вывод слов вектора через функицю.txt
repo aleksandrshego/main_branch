@@ -1,0 +1,19 @@
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+
+void PrintWords(vector<string> words)
+{
+	for (auto w: words)
+	{
+		cout << w << " ";
+	}
+}
+
+int main()
+{
+	PrintWords({ "air", "water", "fire" });
+	return 0;
+}

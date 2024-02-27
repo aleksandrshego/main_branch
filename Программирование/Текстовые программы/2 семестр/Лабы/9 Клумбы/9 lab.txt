@@ -1,0 +1,247 @@
+#include <iostream>
+#include <map>
+#include <vector>
+#include <list>
+#include <fstream>
+#include <string>
+#include <Windows.h>
+#include <algorithm>
+#include <set>
+
+using namespace std;
+
+#define sys system("pause"); system("cls")
+#define cls system("cls")
+#define pause system("pause")
+
+struct Garden
+{
+	int number_flowerbed = 0;
+	string shape = "";
+	list<string> flowers;
+
+	friend ostream& operator<< (ostream& out, const Garden& data)
+	{
+		out << "Номер клумбы - " << data.number_flowerbed << ";\nФорма клумбы - " << data.shape << ".\n";
+		if (data.flowers.size() == 0)
+			out << "Цветов на клумбе нет.\n";
+		else
+		{
+			out << "Цветы, находящиеся на клумбе:\n";
+			for (auto it = data.flowers.begin(); it != data.flowers.end(); ++it)
+				out << "\t- " << *it << "\n";
+		}
+		return out;
+	}
+};
+
+void print(const vector<Garden>& gardens)
+{
+	for (int i = 0; i < gardens.size(); ++i)
+		cout << gardens[i] << "\n";
+}
+
+void prov(ifstream& fin)
+{
+	if (!fin.is_open())
+		throw exception("Ошибка открытия файла.");
+	if (fin.peek() == EOF)
+		throw exception("Файл пуст.");
+}
+
+void lower_string(string& s)
+{
+	for (int i = 0; i < s.size(); ++i)
+		s[i] = tolower(s[i]);
+}
+
+void filling_vector(string& str, vector<Garden>& gard)
+{
+	if (!str.empty() && str[0] != ' ')
+	{
+		Garden garden;
+		str += " ";
+		garden.number_flowerbed = stoi(str.substr(0, str.find_first_of(';')));
+		str.erase(0, str.find_first_of(';') + 1);
+		string shape = str.substr(0, str.find_first_of(';')); lower_string(shape);
+		garden.shape = shape;
+		str.erase(0, str.find_first_of(';') + 1);
+		if (str[0] == ' ')
+			str.erase(0);
+		while(!str.empty())
+		{
+			string flower = str.substr(0, str.find_first_of(" ,\n")); lower_string(flower);
+			garden.flowers.push_back(flower);
+			str.erase(0, str.find_first_of(" ,\n") + 1);
+		}
+		gard.push_back(garden);
+	}
+}
+
+void read_file(vector<Garden>& gard)
+{
+	try
+	{
+		ifstream fin("DATA.txt");
+		prov(fin);
+
+		string str;
+		while (getline(fin, str))
+			filling_vector(str, gard);
+
+		fin.close();
+	}
+	catch (exception& ex)
+	{
+		cout << ex.what() << "\n";
+	}
+}
+
+void print_sort_gardens(vector<Garden>& gardens)
+{
+	sort(gardens.begin(), gardens.end(),
+		[](const Garden& a, const Garden& b)
+		{ 
+			if (a.shape == b.shape)
+				return a.number_flowerbed < b.number_flowerbed;
+			return a.shape < b.shape;
+		});
+	cout << "Список отсортированных клумб:\n";
+	print(gardens);
+}
+
+void filling_map(const vector<Garden>& gard, map<int, Garden>& gard_map)
+{
+	for (int i = 0; i < gard.size(); ++i)
+		gard_map[gard[i].number_flowerbed] = gard[i];
+}
+
+void print_all_flowers(const map<int, Garden>& gardens)
+{
+	set<string, greater<string>> flowers;
+	for (const auto& k : gardens)
+		for (auto it = k.second.flowers.begin(); it != k.second.flowers.end(); ++it)
+			flowers.insert(*it);
+	cout << "Все виды цветов, растущие на клумбах:\n";
+	for (auto it = flowers.begin(); it != flowers.end(); ++it)
+		cout << "\t- " << *it << "\n";
+}
+
+void find_flower(const map<int, Garden>& gardens)
+{
+	vector<int> flowerbeds;
+	cout << "Введите название цветка: "; string flower; cin >> flower; lower_string(flower);
+	for (const auto& k : gardens)
+	{
+		bool prov = false;
+		for (auto it = k.second.flowers.begin(); it != k.second.flowers.end(); ++it)
+			if (*it == flower)
+			{
+				prov = true;
+				break;
+			}	
+		if(!prov)
+			flowerbeds.push_back(k.first);
+	}
+	if (flowerbeds.empty())
+		cout << "Цветок \"" << flower << "\" есть на всех клумбах.\n";
+	else
+	{
+		cout << "Цветок не растёт на клумбе(ах) под номером:\n";
+		for (int i = 0; i < flowerbeds.size(); ++i)
+			cout << "\t- " << flowerbeds[i] << "\n";
+	}
+}
+
+void find_general_flower(const map<int, Garden>& gardens)
+{
+	bool prov = false;
+	map<string, int> flowers;
+	for (const auto& k : gardens)
+		for (auto it = k.second.flowers.begin(); it != k.second.flowers.end(); ++it)
+			flowers[*it]++;
+
+	for (const auto& k : flowers)
+		if (k.second == gardens.size())
+		{
+			cout << "Цветок \"" << k.first << "\" существует на всех клумбах.\n";
+			prov = true;
+		}
+	if (!prov)
+		cout << "Цветы, растущие на всех клумбах, отсутствуют.\n";
+}
+
+int get_different_flowers_size(const Garden& gard) // вычисляет количетво различных цветов
+{
+	set<string> flowers;
+	for (auto it = gard.flowers.begin(); it != gard.flowers.end(); ++it)
+		flowers.insert(*it);
+	return flowers.size();
+}
+
+void find_different_flowers(const vector<Garden>& gardens)
+{
+	cout << "Введите количество различных цветов на клумбе: "; int n; cin >> n;
+	while (cin.fail())
+	{
+		cout << "Ошибка ввода, попробуйте ещё раз.\n";
+		cin >> n;
+	}
+
+	cout << "\nСуществует " << count_if(gardens.begin(), gardens.end(), [&n](const Garden& gard)
+		{
+			return n == get_different_flowers_size(gard);
+		})
+		<< " клумб(-а)(-ы), в которых(-ой) содержится " << n << " различных вида цветов.\n";
+}
+
+void change_flower(vector <Garden>& gardens)
+{
+	cout << "Какой цветок вы хотите изменить - "; string old_flower; cin >> old_flower; lower_string(old_flower);
+	cout << "\nВведите название нового цветка - "; string new_flower; cin >> new_flower; lower_string(new_flower);
+	bool check = false;
+	for (auto& k : gardens)
+		for_each(k.flowers.begin(), k.flowers.end(), [&old_flower, &new_flower, &check](string& flower)
+			{
+				if (flower == old_flower)
+				{
+					flower = new_flower;
+					check = true;
+				}
+			});
+	if (!check)
+		cout << "Цветка " << old_flower << " не было найдено на клумбах.\n";
+	else
+	{
+		cout << "Была произведена замена цветка \"" << old_flower << "\" на \"" << new_flower << "\".\n\n";
+		print(gardens);
+	}
+}
+
+int main()
+{
+	setlocale(0, "rus");
+	SetConsoleCP(1251);
+	SetConsoleOutputCP(1251);
+
+	vector<Garden> gardens;
+	map<int, Garden> gardens_map;
+	read_file(gardens);
+	filling_map(gardens, gardens_map);
+	cout << "Список клумб:\n";
+	print(gardens);
+	sys;
+	print_sort_gardens(gardens);
+	sys;
+	print_all_flowers(gardens_map);
+	sys;
+	find_flower(gardens_map);
+	sys;
+	find_general_flower(gardens_map);
+	sys;
+	find_different_flowers(gardens);
+	sys;
+	change_flower(gardens);
+
+	return 0;
+}

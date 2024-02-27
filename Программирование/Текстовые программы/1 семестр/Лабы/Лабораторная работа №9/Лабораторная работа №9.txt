@@ -1,0 +1,150 @@
+/*
+			ЛАБОРАТОРНАЯ РАБОТА №9. ВАРИАНТ 10. ШЕГО АЛЕКСАНДР
+	Задан текстовый файл input.txt. Требуется определить строки этого
+	файла, содержащие максимальную по длине подстроку, состоящую только из
+	знаков препинания. Перечень символов, подходящих под определение “знаки
+	препинания”, задает пользователь. Если таких строк несколько, найти первые
+	10. Результат вывести на консоль в форме, удобной для чтения.
+*/
+
+#include <iostream>
+#include <fstream>
+#include <map>
+#include <string>
+#include <vector>
+#include <sstream>
+
+using namespace std;
+
+bool CheckingSign(char& s) // проверка на ввод символа
+{
+	if (s == '!' || s == ',' || s == '.' || s == '-' || s == ':' || s == ';' || s == '?')
+		return true;	
+	else
+		return false;
+}
+
+void InputSigns(map <char, int>& signs)
+{
+	int step = 0;
+	char sign_ch;
+	cout << "Введите знаки препинания, которые буду учитываться в тексте (при окончании ввода знаков ввести 'q', если не превышено количество ввода):\n";
+	while (step < 7)
+	{
+		cin >> sign_ch;
+		if (sign_ch == 'q')
+			break;
+		else if (CheckingSign(sign_ch))
+		{
+			signs[sign_ch];
+			step++;
+		}
+		else
+			cout << "Введён неверный символ, попробуйте ещё раз.\n";
+	}
+}
+
+bool Check(map <char, int>& signs, char& s) // а это проверяет именно на символы, которые объявил пользователь
+{
+	for (const auto& k : signs)
+	{
+		if (k.first == s)
+			return true;
+	}
+	return false;
+}
+
+void AnalysisString(const string& s, vector <int>& ch_of_string, vector <string>& all_s, map <char, int>& signs, int& sum, int& max_ch_str)
+{
+	all_s.push_back(s);
+	istringstream str(s);
+	string input;
+	while (str >> input)
+	{
+		for (int i = 0; i < input.length(); i++)
+		{
+			if (CheckingSign(input[i])) // проверяет вообще на знак, как бы фильтрует
+			{
+				if (Check(signs, input[i]))
+				{
+					signs[input[i]]++;
+				}
+			}
+			else
+				break;
+		}
+		for (auto& k : signs)
+		{
+			sum += k.second;
+		}
+		if (sum > max_ch_str)
+			max_ch_str = sum;
+		sum = 0;
+		for (auto& k : signs)
+		{
+			k.second = 0;
+		}
+	}
+	ch_of_string.push_back(max_ch_str);
+	max_ch_str = 0;
+}
+
+void ComparisonAllStrAndOutput(const vector<int>& ch, const vector<string>& s)
+{
+	int max = ch[0];
+	for (int i = 1; i < ch.size(); i++)
+	{
+		if (ch[i] > max)
+			max = ch[i];
+	}
+	for (int i = 0; i < ch.size(); i++)
+	{
+		if (ch[i] == max)
+			cout << s[i] << "\n";
+	}
+	// сначала находим макисмальное количество символов
+}
+
+int main()
+{
+	setlocale(LC_ALL, "rus");
+	ifstream fin;
+
+	fin.open("input.txt");
+	
+	if (!fin.is_open())
+	{
+		cout << "Ошибка открытия файла input.txt\n";
+	}
+	else
+	{
+		if (fin.peek() == EOF)
+		{
+			cout << "Файл пустой.\n";
+
+			fin.close();
+
+			return 0;
+		}
+
+		// объявление всего нужного
+		map <char, int> signs;
+		vector <string> all_string;
+		vector <int> ch_of_string;
+		string str;
+		int sum = 0, index_of_vector = 0, max_char_of_string = 0;
+
+		InputSigns(signs);
+		
+		while (getline(fin, str)) // работаем со строками
+		{
+			AnalysisString(str, ch_of_string, all_string, signs, sum, max_char_of_string);
+		}
+		
+		cout << "\nСтроки с наибольшим количеством знаков препинания в подстроке:\n";
+		ComparisonAllStrAndOutput(ch_of_string, all_string);
+	}
+	fin.close();
+
+	return 0;
+}

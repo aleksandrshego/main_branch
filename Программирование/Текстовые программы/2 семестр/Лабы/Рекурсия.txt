@@ -1,0 +1,156 @@
+#include <iostream>
+#include <iomanip>
+#include <Windows.h> // for system("cls")
+#include <conio.h> // for _getch
+
+using namespace std;
+
+void FabsNumber(int& num) // если вдруг будет отрицательной, то эта функция уберёт минус, чтобы измежать ошибок
+{
+	if (num < 0)
+		num = fabs(num);
+}
+
+int InputNumber() // ввод определённого числа
+{
+	cout << "Введите число: ";
+	int number; cin >> number;
+	while (cin.fail())
+	{
+		cin.clear();
+		cin.ignore(32767, '\n');
+		cout << "\nОшибка.\nВведите число: ";
+		cin >> number;
+	}
+	FabsNumber(number);
+	return number;
+}
+
+long double Factorial(long long num)
+{
+	if (num > 1)
+		return num * Factorial(num - 1);
+	if (num == 1 || num == 0)
+		return 1;
+}
+
+void Number4()
+{
+	int number = InputNumber();
+	cout << "Факториал числа " << number << " равен " << Factorial(number);
+}
+
+int NumberOfDigits(int number)
+{
+	if (number > 0)
+		return 1 + NumberOfDigits(number / 10);
+	if (number == 0)
+		return 0;
+}
+
+void Number3()
+{
+	int number = InputNumber();
+	cout << "Количество цифр числа " << number << " : " << NumberOfDigits(number);
+}
+
+long int SumArrNumbers(int* a, int n)
+{
+	if (n > 0)
+		return a[n] + SumArrNumbers(a, n - 1);
+	if (n == 0)
+		return a[n];
+}
+
+void Number2()
+{
+	cout << "Введите размерность: ";
+	int size; cin >> size;
+	while (cin.fail())
+	{
+		cin.clear();
+		cin.ignore(32767, '\n');
+		cout << "\nОшибка.\nВведите число: ";
+		cin >> size;
+	}
+
+	int* arr = new int[size];
+	for (int i = 0; i < size; i++)
+	{
+		cin >> arr[i];
+		while (cin.fail())
+		{
+			cin.clear();
+			cin.ignore(32767, '\n');
+			cout << "\nОшибка.\nВведите число: ";
+			cin >> arr[i];
+		}
+	}
+	cout << "\nСумма элементов массива: " << SumArrNumbers(arr, size - 1) << "\n";
+}
+
+int SumNumbers(int num)
+{
+	if (num > 0)
+		return num % 10 + SumNumbers(num / 10);
+	if (num == 0)
+		return 0;
+}  
+\\ или можно найти с помощью одной строки, что довольно гениально и интересно 
+
+int SumNumbers(int k)
+{
+	return --k % 9 + 1;
+}
+
+void Number1()
+{
+	int number = InputNumber();
+	cout << "\nСумма цифр числа равна: " << SumNumbers(number) << "\n";
+}
+
+void Choice()
+{
+	cout << "Выберите один из вариантов:\n\t1. Сумма цифр числа;\n\t2. Сумма элементов массива;\n\t3. Количество цифр числа;\n\t4. Факториал числа.\n";
+	switch (_getch())
+	{
+	case '1':
+	{
+		system("cls");
+		Number1();
+		break;
+	}
+	case '2':
+	{
+		system("cls");
+		Number2();
+		break;
+	}
+	case '3':
+	{
+		system("cls");
+		Number3();
+		break;
+	}
+	case '4':
+	{
+		system("cls");
+		Number4();
+		break;
+	}
+	default:
+	{
+		cout << "Не выбран один из вариантов, попробуйте ещё раз.\n";
+		Choice();
+	}
+	}
+
+}
+
+int main()
+{
+	setlocale(LC_ALL, "rus");
+	Choice();
+	
+	return 0;
+}

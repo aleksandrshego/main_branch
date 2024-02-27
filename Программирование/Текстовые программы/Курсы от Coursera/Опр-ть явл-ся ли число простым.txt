@@ -1,0 +1,27 @@
+#include <iostream>
+#include <cmath>
+using namespace std;
+int main() 
+{
+	setlocale(LC_ALL, "rus");
+	int n, prov, i; double r, k;
+	cout << "Введите число n: "; cin >> n;
+	if (n == 2 || n == 3) 
+	{
+		cout << "Число простое" << endl;
+	}
+	else 
+	{
+		i = 2;
+		prov = 1;
+		r = n; k = (floor(sqrt(r)));
+		while ((i <= k) && (prov)) 
+		{
+			if (n % i == 0) prov = 0;
+			else ++i;
+		}
+		if (prov) cout << "Число простое" << endl;
+		else cout << "Число не является простым" << endl;
+	}
+	return 0;
+}

@@ -1,0 +1,341 @@
+#include <iostream>
+#include <map>		 // for sorting*
+#include <list>		 // for sorting*
+#include <vector>	 // for sorting*
+#include <conio.h>   // for _getch()
+#include <Windows.h> // for system("cls")
+#include <iomanip>	 // for setprecision
+#include <algorithm> // for reverse, sort
+#include <cctype>    // for _stricmp(char*,char*)
+#include <cmath>     // for fabs()
+
+using namespace std;
+
+void prov_cin_fail(int& k)
+{
+	while (cin.fail()) // если предыдущее извлечение оказалось неудачным,
+	{
+		cin.clear(); // то возвращаем cin в 'обычный' режим работы
+		cin.ignore(32767, '\n'); // и удаляем значения предыдущего ввода из входного буфера
+		cout << "Ошибка.\nВведите ещё раз: ";
+		cin >> k;
+	}
+}
+
+void prov(int& p)
+{
+	while (true)
+	{
+		prov_cin_fail(p);
+		if (p < 0)
+		{
+			p = fabs(p);
+			cout << "Произведена замена знака значения " << p << "\n";
+			break;
+		}
+		else if (p == 0)
+		{
+			cout << "Ошибка.\nВведите ещё раз: ";
+			cin >> p;
+		}
+		else
+			break;
+	}
+}
+
+template <class Type>
+void another_completion(Type* arr, const int& n, const int& x)
+{
+	for (int i = 0; i < n; i++)
+		arr[i] = (Type)x;
+}
+
+struct Words {
+	Words(char* word, int freq)
+	{
+		this->freq = freq;
+		this->word = word;
+	}
+	char* word;
+	int freq = 0;
+};
+
+bool Greater(const Words& a, const Words& b)
+{
+	if (a.freq == b.freq)
+		return a.word < b.word;
+
+	return a.freq > b.freq;
+}
+
+template <class Type>
+void output_arr(Type* arr, const int& s)
+{
+	for (int i = 0; i < s; i++)
+		cout << arr[i] << "\n";
+}
+
+void output_arr(vector <Words> c)
+{
+	for (int i = 0; i < c.size(); i++)
+		cout << c[i].word << " " << c[i].freq << "\n";
+}
+
+template <class Type>
+int find_max(const map <Type, int>& F)
+{
+	int max = 0;
+	for (const auto& k : F)
+	{
+		if (k.second > max)
+			max = k.second;
+	}
+	return max;
+}
+
+template <class Type>
+int get_quantity(const map <Type, int>& F, const int& max)
+{
+	int q = 0;
+	for (const auto& k : F)
+		if (k.second == max)
+			q++;
+	return q;
+}
+
+template <class Type>
+void delete_arr(Type* arr) // for int, double
+{
+	delete[] arr;
+}
+
+void completion(char** arr, const int& n, const int& l, vector <Words>& cnt)
+{
+	for (int i = 0; i < n; i++) {
+		if (i == 0)
+		{
+			for (int k = 0; k < l; k++)
+				arr[i][k] = tolower(arr[i][k]);
+			cnt.push_back(Words(arr[i], 1));
+		}
+		else
+		{
+			bool prov = false;
+			for (int j = 0; j < cnt.size(); j++)
+			{
+				if (_stricmp(arr[i], cnt[j].word) == 0)
+				{
+					cnt[j].freq++;
+					prov = true;
+					break;
+				}
+			}
+			if (!prov)
+			{
+				for (int k = 0; k < l; k++)
+					arr[i][k] = tolower(arr[i][k]);
+				cnt.push_back(Words(arr[i], 1));
+			}
+		}
+	}
+}
+
+int input_length()
+{
+	cout << "Введите длину слов: ";
+	int length;
+	cin >> length;
+	prov(length);
+	return length;
+}
+
+void input_diapazon(int& a, int& b)
+{
+	cout << "Введите диапазон генерирования:\nот ";
+	cin >> a;
+	prov_cin_fail(a);
+	cout << "до ";
+	cin >> b;
+	prov_cin_fail(b);
+	if (b < a)
+		swap(a, b);
+}
+
+template <class Type> // for int and double
+int sort_cust(Type* arr, const int& s)
+{
+	vector <Type> ordered_numbers;
+	map <Type, int> frequency;
+	for (int i = 0; i < s; i++)
+		frequency[arr[i]]++;
+	while (frequency.size() != 0)
+	{
+		int max = find_max(frequency), quantity = get_quantity(frequency, max);
+		list <Type> num;
+		while (quantity != 0)					// сбиваем итератор и возвращаем обратно, чтобы избежать ошибки, которая у меня возникала, пока что не знаю как сделать иначе.
+		{										// хотя есть догадки, что необходимо работать с итератором (курсором)
+			for (auto& k : frequency)
+				if (k.second == max)			// сюда можно добавить цикл, чтобы не оставлять некоторые массивы равные некоторому числу, 
+				{								// ведь в них потом остаюстся тоже числа. (Размерность меняется ввиду частоты встречаемости чисел, логично, что число 3,
+					num.push_front(k.first);	// например, встречается 5 раз, и мы же не будем выписывать 5 раз, хотя можно сделать и так).
+					frequency.erase(k.first);   // * list для того, чтобы добавлять в начало, ибо пришлось бы вектора делать реверсирование, а это довльно неприятное явление,
+					quantity--;					// * имеется ввиду при шаблонах
+					break;
+				}
+		}
+		for (const auto& k : num)
+			ordered_numbers.push_back(k);
+	}
+	for (int i = 0; i < ordered_numbers.size(); i++)
+		arr[i] = ordered_numbers[i];
+	
+	return ordered_numbers.size();
+}
+
+void sort_cust(char** arr, const int& n, const int& l, vector <Words>& count)
+{
+	completion(arr, n, l, count);
+	sort(count.begin(), count.end(), Greater);
+}
+
+int get_size_array()
+{
+	int s;
+	cout << "Введите размерность массива: ";
+	cin >> s;
+	prov(s);
+	return s;
+}
+// перегрузки Random
+void random_cust(int* arr, const int& size)
+{
+	int a, b;
+	input_diapazon(a, b);
+	srand(time(NULL));
+	if (a == b)
+		another_completion(arr, size, a);
+	else
+		for (int i = 0; i < size; i++)
+			arr[i] = rand() % (b - a) + 1 + a;
+}
+
+void random_cust(double* arr, const int& size)
+{
+	int a, b;
+	input_diapazon(a, b);
+	srand(time(NULL));
+	if (a == b)
+		another_completion(arr, size, a);
+	else
+		for (int i = 0; i < size; i++)
+			arr[i] = a + (double)(rand()) / ((double)(RAND_MAX / (b - a)));
+}
+
+void random_cust(char* arr, const int& lenght)
+{
+	int k;
+	for (int j = 0; j < lenght; j++)
+	{
+		k = rand() % 2;
+		if (k > 0)
+			arr[j] = (char)(rand() % 26 + 97);
+		else
+			arr[j] = (char)(rand() % 26 + 65);
+	}
+	arr[lenght] = '\0';
+}
+
+char** arr_declaration(const int& n, const int& l) // добавление каждого элемента массива char**
+{
+	char** arr = new char* [n];
+	for (int i = 0; i < n; i++)
+	{
+		arr[i] = new char[l];
+		random_cust(arr[i], l);
+	}
+	return arr;
+}
+										 
+void sort_int(const int& size)
+{
+	int* arr = new int[size];
+	random_cust(arr, size);
+	system("cls");
+	cout << "Исходный массив:\n";
+	output_arr(arr, size);
+	cout << "\nОтсортированный массив (по частоте встречаемости):\n";
+	output_arr(arr, sort_cust(arr, size));
+	delete_arr(arr);
+}
+
+void sort_double(const int& size)
+{
+	double* arr = new double[size];
+	random_cust(arr, size);
+	system("cls");
+	cout << "Исходный массив:\n";
+	output_arr(arr, size);
+	cout << "\nОтсортированный массив (по частоте встречаемости):\n";
+	output_arr(arr, sort_cust(arr, size));
+	delete_arr(arr);
+}
+
+void sort_char(const int& size)
+{
+	vector <Words> count;
+	int length = input_length();
+	char** arr = arr_declaration(size, length); // объявление как раз-таки само
+	system("cls");
+	cout << "Исходный массив:\n";
+	output_arr(arr, size);
+	sort_cust(arr, size, length, count);
+	cout << "\nОтсортированный массив (по частоте встречаемости):\n";
+	output_arr(count);
+	//Sort(arr, size);
+}
+
+void choice_dipper()
+{
+	switch (_getch())
+	{
+	case '1':
+	{
+		system("cls");
+		sort_int(get_size_array());
+		break;
+	}
+	case '2':
+	{
+		system("cls");
+		sort_double(get_size_array());
+		break;
+	}
+	case '3':
+	{
+		system("cls");
+		sort_char(get_size_array());
+		break;
+	}
+	default:
+	{
+		cout << "Ошибка, повторите ещё раз.\n";
+		choice_dipper();
+	}
+	}
+}
+
+void сhoice()
+{
+	cout << "Выберите один из вариантов:\n\t1. Сортировка массива типа int\n\t2. Сортировка массива типа double\n\t3. Сортировка массива типа char*\n";
+	choice_dipper();
+}
+
+int main()
+{	
+	cout << setprecision(2) << fixed;
+	setlocale(LC_ALL, "rus");
+	
+	сhoice();
+
+	return 0;
+}

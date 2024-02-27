@@ -1,0 +1,32 @@
+#include <iostream>
+#include <vector>
+#include <iomanip>
+#include <string>
+
+using namespace std;
+
+int main()
+{
+	string temp;
+	vector <string> str;
+	for (int i = 0; i < 3; i++)
+	{
+		cin >> temp;
+		str.push_back(temp);
+	}
+	for (int i = 0; i < 2; i++)
+	{
+		if (str[i] < str[i + 1])
+		{
+			temp = str[i];
+			str[i + 1] = str[i];
+		}
+		if (str[i] > str[i + 1])
+		{
+			temp = str[i + 1];
+			str[i] = str[i + 1];
+		}
+	}
+	cout << temp << endl;
+	return 0;
+}

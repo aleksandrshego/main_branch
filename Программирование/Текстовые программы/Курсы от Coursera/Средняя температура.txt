@@ -1,0 +1,32 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+int main()
+{
+	int day, sum = 0, more = 0;
+	float s_arif;
+	cin >> day;
+	vector<int> weather(day);
+	for (int i = 0; i < day; i++)
+	{
+		cin >> weather[i];
+		sum += weather[i];
+	}
+	vector <int> days_more;
+	s_arif = sum / weather.size();
+	for (int i = 0; i < day; i++)
+	{
+		if (weather[i] > s_arif)
+		{
+			days_more.push_back(i);
+			more++;
+		}
+	}
+	cout << more << "\n";
+	for (int i : days_more)
+		cout << i << " ";
+	return 0;
+}

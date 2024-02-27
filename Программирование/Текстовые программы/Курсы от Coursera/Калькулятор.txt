@@ -1,0 +1,36 @@
+#include <iostream>
+using namespace std;
+int main()
+{
+	setlocale(LC_ALL, "rus");
+	double a, b, res; char op;
+	cout << "\nВведите 1-е число : "; cin >> a;
+	cout << "\nВведите 2-й число : "; cin >> b;
+	cout << "\nЧто вы хотите сделать с первым числом?\n-Сложить '+';\n-Вычесть '-';\n-Умножить '*';\n-Поделить '/';\n-Возвести в степень '^';\nВаш знак : "; cin >> op;
+	switch (op) {
+		case '+': res = a + b;
+			cout << "\nРезультат : " << res << endl;
+			break;
+		case '-': res = a - b;
+			cout << "\nРезультат : " << res << endl;
+			break;
+		case '*': res = a * b;
+			cout << "\nРезультат : " << res << endl;
+			break;
+		case '/':
+			if (b == 0) {
+				cout << "\nНа нуль делить нельзя" << endl;
+				break;
+			}
+			else if (b != 0) {
+				res = a / b;
+				cout << "\nРезультат : " << res << endl;
+				break;
+			}
+		case '^': res = pow(a, b);
+			cout << "\nРезультат : " << res << endl;
+			break;
+		default: cout << "\nНеизвестная операция" << endl;
+	}
+	return 0;
+}

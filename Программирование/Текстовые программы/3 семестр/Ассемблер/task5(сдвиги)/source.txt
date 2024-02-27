@@ -1,0 +1,91 @@
+/*
+		Написать программу на C++, которая выполняет следующую задачу:
+
+		Ввести с консоли целое положительное число N. Создать динамический 
+		массив из N целых чисел и заполнить его введенными с консоли числами. 
+		Затем все четные элементы массива разделить на 2, а нечетные - умножить на 4, 
+		при этом использовать команды div, idiv, mul, imul не разрешается. 
+
+		Вывести получившийся массив на экран. (Например, массив {1, -5, 0, -9, 44} должен стать массивом {4, -20, 0, -36, 22})
+
+		Все проверки и вычисления должны быть написаны на языке ассемблера в виде ассемблерной вставки, 
+		на C++ должен быть только консольный ввод-вывод и объявление переменных. 
+		Для хранения промежуточных значений нельзя создавать дополнительные переменные или массивы, можно использовать только регистры общего назначения.
+*/
+
+#include <iostream>
+
+int get_size()
+{
+	int size = 0;
+	std::cout << "Input size of array: ";
+	while (size <= 0)
+		std::cin >> size;
+
+	return size;
+}
+
+void output(const int& size, const int* ar)
+{
+	for (int i = 0; i < size; ++i)
+		std::cout << ar[i] << " ";
+	std::cout << "\n";
+}
+
+void manual_input(const int& size, int* ar)
+{
+	std::cout << "Input elements:\n";
+
+	for (int i = 0; i < size; ++i)
+		std::cin >> ar[i];
+
+	system("cls");
+
+	std::cout << "Source array:\n";
+	output(size, ar);
+}
+
+int main()
+{
+	int n = get_size();
+	int* arr = new int[n];
+	manual_input(n, arr);
+
+	__asm {
+		xor eax, eax
+		xor ebx, ebx
+		xor ecx, ecx
+		xor edx, edx
+
+		mov ebx, arr
+		mov ecx, n
+
+	start:
+		dec ecx
+		mov eax, [ebx + 4 * ecx]
+		inc ecx
+
+		test eax, 1
+		jnz od
+		jz ev
+
+	od:
+		sal eax, 3
+		dec ecx
+		mov [ebx + 4 * ecx], eax
+		inc ecx
+
+	ev:
+		sar eax, 1
+		dec ecx
+		mov [ebx + 4 * ecx], eax
+		inc ecx
+
+	loop start
+	}
+	
+	std::cout << "\nModified array:\n";
+	output(n, arr);
+
+	return 0;
+}

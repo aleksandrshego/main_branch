@@ -1,0 +1,47 @@
+#pragma once
+#include <string>
+#include <iostream>
+
+using namespace std;
+
+enum class condition {Normal, Paralyzed, Dead};
+enum class race { Human, Dwarf, Elf};
+
+class Person
+{	
+protected:
+	// ниже поля, которые возвращают определённые значения
+	// я сделал функции (выше), которые, можно сказать, расшифровывают и выводят в строку то или иное сообщение
+
+	const short id; // уникальный числовой индефикатор 
+	static short count; // статический счётчик
+	condition condit_p; // состояние
+	const race race_p; // раса
+	bool movement; // возможность двигаться
+	string name; // имя
+
+public:
+	Person();
+	Person(const string, const condition, const race); 
+	Person(const Person&);
+
+	void set_condition(condition);
+	string get_condition() const;
+
+	string get_race() const;
+	
+	void set_name(const string&);
+	string get_name() const;
+
+	//void set_movement(bool);
+	string get_movement() const;
+
+	short get_id() const;
+	
+	Person& operator = (const Person&);
+	
+	bool operator == (const Person&);
+	friend ostream& operator << (ostream&, const Person&);
+	
+	virtual ~Person();
+};
